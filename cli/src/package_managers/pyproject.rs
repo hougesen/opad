@@ -30,3 +30,8 @@ pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool
 
     Ok(modified)
 }
+
+#[inline]
+pub fn update_lock_files(_path: &std::path::Path) -> anyhow::Result<bool> {
+    todo!()
+}

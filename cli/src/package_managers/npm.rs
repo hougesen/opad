@@ -30,6 +30,11 @@ pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow
     Ok(modified)
 }
 
+#[inline]
+pub fn update_lock_files(_path: &std::path::Path) -> anyhow::Result<bool> {
+    todo!()
+}
+
 #[cfg(test)]
 mod test_set_package_json_version {
     use super::set_package_json_version;
