@@ -1,7 +1,9 @@
-use toml_edit::TableLike;
-
-fn set_package_version(package_table: &mut dyn TableLike, version: &str) -> bool {
-    if package_table.get("version").is_some_and(|v| v.is_str()) {
+#[inline]
+fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &str) -> bool {
+    if package_table
+        .get("version")
+        .is_some_and(|outer| outer.as_str().is_some_and(|inner| inner != version))
+    {
         package_table.insert(
             "version",
             toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
@@ -14,6 +16,7 @@ fn set_package_version(package_table: &mut dyn TableLike, version: &str) -> bool
     }
 }
 
+#[inline]
 pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let mut modified = false;
 
@@ -37,7 +40,9 @@ pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::
         }
     }
 
-    std::fs::write(path, parsed.to_string())?;
+    if modified {
+        std::fs::write(path, parsed.to_string())?;
+    }
 
     Ok(modified)
 }
