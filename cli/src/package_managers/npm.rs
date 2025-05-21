@@ -1,3 +1,5 @@
+use anyhow::Ok;
+
 #[inline]
 pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
@@ -31,8 +33,30 @@ pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow
 }
 
 #[inline]
-pub fn update_lock_files(_path: &std::path::Path) -> anyhow::Result<bool> {
-    todo!()
+pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
+    let exit_code = if path.join("pnpm-lock.yaml").exists() {
+        std::process::Command::new("pnpm")
+            .arg("install")
+            .spawn()?
+            .wait()
+    } else if path.join("bun.lockb").exists() {
+        std::process::Command::new("bun")
+            .arg("install")
+            .spawn()?
+            .wait()
+    } else if path.join("yarn.lock").exists() {
+        std::process::Command::new("yarn")
+            .arg("install")
+            .spawn()?
+            .wait()
+    } else {
+        std::process::Command::new("npm")
+            .arg("install")
+            .spawn()?
+            .wait()
+    }?;
+
+    Ok(exit_code.success())
 }
 
 #[cfg(test)]
