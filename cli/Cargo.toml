@@ -5,9 +5,8 @@ edition = { workspace = true }
 
 [dependencies]
 anyhow = "1.0.98"
-clap = { version = "4.5.38", features = ["derive"] }
-clap_complete = "4.5.50"
-clap_complete_nushell = "4.5.5"
+crossterm = "0.29.0"
 ignore = "0.4.23"
+inquire = "0.7.5"
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 toml_edit = "0.22.26"
