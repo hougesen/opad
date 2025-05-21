@@ -2,11 +2,20 @@
 name = "crosspmv"
 version = { workspace = true }
 edition = { workspace = true }
+description = "Easily set package version across multiple package manager systems in mono repositories"
+authors = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+keywords = ["monorepository"]
+homepage = { workspace = true }
+readme = { workspace = true }
+documentation = { workspace = true }
+categories = ["development-tools", "command-line-utilities"]
 
 [dependencies]
-anyhow = "1.0.98"
-crossterm = "0.29.0"
-ignore = "0.4.23"
-inquire = "0.7.5"
-serde_json = { version = "1.0.140", features = ["preserve_order"] }
-toml_edit = "0.22.26"
+anyhow = { workspace = true }
+crossterm = { workspace = true }
+ignore = { workspace = true }
+inquire = { workspace = true }
+serde_json = { workspace = true }
+toml_edit = { workspace = true }
