@@ -7,6 +7,12 @@ pub fn set_deno_json_version(path: &std::path::Path, version: &str) -> anyhow::R
 }
 
 #[inline]
-pub fn update_lock_files(_path: &std::path::Path) -> anyhow::Result<bool> {
-    todo!()
+pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
+    let exit_code = std::process::Command::new("deno")
+        .arg("install")
+        .current_dir(path)
+        .spawn()?
+        .wait()?;
+
+    Ok(exit_code.success())
 }

@@ -44,7 +44,7 @@ pub fn run_command() -> anyhow::Result<()> {
         .with_default(false)
         .prompt_skippable()?;
 
-    if should_update_lock_files.is_some_and(|value| value == true) {
+    if should_update_lock_files.unwrap_or_default() {
         for f in modified_files {
             println!(
                 "{}",

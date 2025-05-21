@@ -35,26 +35,25 @@ pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow
 #[inline]
 pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
     let exit_code = if path.join("pnpm-lock.yaml").exists() {
-        std::process::Command::new("pnpm")
-            .arg("install")
-            .spawn()?
-            .wait()
+        let mut cmd = std::process::Command::new("pnpm");
+        cmd.arg("install");
+        cmd
     } else if path.join("bun.lockb").exists() {
-        std::process::Command::new("bun")
-            .arg("install")
-            .spawn()?
-            .wait()
+        let mut cmd = std::process::Command::new("bun");
+        cmd.arg("install");
+        cmd
     } else if path.join("yarn.lock").exists() {
-        std::process::Command::new("yarn")
-            .arg("install")
-            .spawn()?
-            .wait()
+        let mut cmd = std::process::Command::new("yarn");
+        cmd.arg("install");
+        cmd
     } else {
-        std::process::Command::new("npm")
-            .arg("install")
-            .spawn()?
-            .wait()
-    }?;
+        let mut cmd = std::process::Command::new("npm");
+        cmd.arg("install");
+        cmd
+    }
+    .current_dir(path)
+    .spawn()?
+    .wait()?;
 
     Ok(exit_code.success())
 }
