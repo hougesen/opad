@@ -1,4 +1,5 @@
 mod cargo;
+mod npm;
 
 #[derive(Debug, Clone, Copy)]
 pub enum PackageManager {
@@ -61,7 +62,7 @@ impl PackageManagerFile {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
             PackageManager::CargoLock => Ok(false),
 
-            PackageManager::PackageJson => Ok(false),
+            PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
             PackageManager::PackageLockJson => Ok(false),
 
             PackageManager::PnpmLockYaml => Ok(false),
