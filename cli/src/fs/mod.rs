@@ -10,8 +10,20 @@ fn setup_walker(path: &std::path::Path) -> ignore::Walk {
 
 #[inline]
 pub fn find_package_manager_files(path: &std::path::Path) -> Vec<PackageManagerFile> {
-    setup_walker(path)
+    let mut files = setup_walker(path)
         .flatten()
-        .filter_map(|p| PackageManagerFile::maybe_from_path(p.path()))
-        .collect()
+        .filter_map(|entry| {
+            let inner = entry
+                .path()
+                .strip_prefix(path)
+                .unwrap_or_else(|_| entry.path());
+
+            PackageManagerFile::maybe_from_path(inner)
+        })
+        .filter(|p| p.package_manager.is_enabled())
+        .collect::<Vec<_>>();
+
+    files.sort_unstable();
+
+    files
 }
