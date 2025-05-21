@@ -20,7 +20,6 @@ pub fn find_package_manager_files(path: &std::path::Path) -> Vec<PackageManagerF
 
             PackageManagerFile::maybe_from_path(inner)
         })
-        .filter(|p| p.package_manager.is_enabled())
         .collect::<Vec<_>>();
 
     files.sort_unstable();

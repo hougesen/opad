@@ -1,27 +1,25 @@
+mod cabal;
 mod cargo;
 mod npm;
+mod pyproject;
+mod stack;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PackageManager {
     // cargo
     CargoToml,
-    CargoLock,
 
     // npm
     PackageJson,
-    PackageLockJson,
-
-    // pnpm
-    PnpmLockYaml,
-
-    // yarn
-    YarnLock,
 
     // cabal
     Cabal,
 
     // stack
     Stack,
+
+    // python
+    PyProject,
 }
 
 impl PackageManager {
@@ -30,16 +28,12 @@ impl PackageManager {
         if let Some(file_name) = path.file_name().and_then(|inner| inner.to_str()) {
             let pm = match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
-                "Cargo.lock" => Some(Self::CargoLock),
 
                 "package.json" => Some(Self::PackageJson),
-                "package-lock.json" => Some(Self::PackageLockJson),
-
-                "pnpm-lock.yaml" => Some(Self::PnpmLockYaml),
-
-                "yarn.lock" => Some(Self::YarnLock),
 
                 "package.yaml" => Some(Self::Stack),
+
+                "pyproject.toml" => Some(Self::PyProject),
 
                 _ => None,
             };
@@ -63,25 +57,6 @@ impl PackageManager {
 
         None
     }
-
-    #[inline]
-    pub const fn is_enabled(self) -> bool {
-        match self {
-            Self::CargoToml => true,
-            Self::CargoLock => false,
-
-            Self::PackageJson => true,
-            Self::PackageLockJson => false,
-
-            Self::PnpmLockYaml => false,
-
-            Self::YarnLock => false,
-
-            Self::Cabal => false,
-
-            Self::Stack => false,
-        }
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -102,21 +77,21 @@ impl Eq for PackageManagerFile {}
 
 impl PartialOrd for PackageManagerFile {
     #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.path.cmp(&other.path))
     }
 }
 
 impl Ord for PackageManagerFile {
     #[inline]
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.path.cmp(&other.path)
     }
 }
 
-impl std::fmt::Display for PackageManagerFile {
+impl core::fmt::Display for PackageManagerFile {
     #[inline]
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.path.display())
     }
 }
@@ -134,18 +109,51 @@ impl PackageManagerFile {
     pub fn set_package_version(&self, version: &str) -> anyhow::Result<bool> {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
-            PackageManager::CargoLock => Ok(false),
 
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
-            PackageManager::PackageLockJson => Ok(false),
 
-            PackageManager::PnpmLockYaml => Ok(false),
+            PackageManager::Cabal => cabal::set_version(&self.path, version),
 
-            PackageManager::YarnLock => Ok(false),
+            PackageManager::Stack => stack::set_version(&self.path, version),
 
-            PackageManager::Cabal => Ok(false),
+            PackageManager::PyProject => pyproject::set_version(&self.path, version),
+        }
+    }
+}
 
-            PackageManager::Stack => Ok(false),
+#[cfg(test)]
+mod test_package_manager {
+    use super::PackageManager;
+
+    #[test]
+    fn it_should_correctly_determine_package_manager_system() {
+        let expected_results = [
+            (
+                PackageManager::CargoToml,
+                std::path::Path::new("../Cargo.toml"),
+            ),
+            (
+                PackageManager::Stack,
+                std::path::Path::new("cli/package.yaml"),
+            ),
+            (
+                PackageManager::PackageJson,
+                std::path::Path::new("package.json"),
+            ),
+            (
+                PackageManager::Cabal,
+                std::path::Path::new("../../crosspmv.cabal"),
+            ),
+            (
+                PackageManager::PyProject,
+                std::path::Path::new("pyproject.toml"),
+            ),
+        ];
+
+        for (package_manager, path) in expected_results {
+            let result = PackageManager::maybe_from_path(path).unwrap();
+
+            assert_eq!(package_manager, result);
         }
     }
 }

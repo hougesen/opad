@@ -5,3 +5,16 @@ resolver = "3"
 [workspace.package]
 version = "0.0.0"
 edition = "2024"
+homepage = "https://github.com/hougesen/crosspmv?tab=readme-ov-file"
+authors = ["Mads Hougesen <mads@mhouge.dk>"]
+license = "MIT"
+repository = "https://github.com/hougesen/crosspmv"
+documentation = "https://github.com/hougesen/crosspmv#readme"
+
+[workspace.dependencies]
+anyhow = "1.0.98"
+crossterm = "0.29.0"
+ignore = "0.4.23"
+inquire = "0.7.5"
+serde_json = { version = "1.0.140", features = ["preserve_order"] }
+toml_edit = "0.22.26"

@@ -22,15 +22,15 @@ pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::
 
     let contents = std::fs::read_to_string(path)?;
 
-    let mut parsed = contents.parse::<toml_edit::DocumentMut>()?;
+    let mut document = contents.parse::<toml_edit::DocumentMut>()?;
 
-    if let Some(package_raw) = parsed.get_mut("package") {
+    if let Some(package_raw) = document.get_mut("package") {
         if let Some(package_table) = package_raw.as_table_like_mut() {
             modified |= set_package_version(package_table, version);
         }
     }
 
-    if let Some(workspace) = parsed.get_mut("workspace") {
+    if let Some(workspace) = document.get_mut("workspace") {
         if let Some(workspace_table) = workspace.as_table_like_mut() {
             if let Some(package) = workspace_table.get_mut("package") {
                 if let Some(package_table) = package.as_table_like_mut() {
@@ -41,7 +41,7 @@ pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::
     }
 
     if modified {
-        std::fs::write(path, parsed.to_string())?;
+        std::fs::write(path, document.to_string())?;
     }
 
     Ok(modified)
