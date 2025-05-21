@@ -1,0 +1,6 @@
+.env
+/codegen/target
+/target
+broken.md
+myapp.log
+node_modules
