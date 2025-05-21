@@ -1,6 +1,4 @@
 .env
-/codegen/target
 /target
-broken.md
-myapp.log
+demo
 node_modules

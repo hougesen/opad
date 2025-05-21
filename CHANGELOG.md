@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- feat: add support for pyproject.toml [`#5`](https://github.com/hougesen/crosspmv/pull/5)
 - feat: command for setting package versions [`#4`](https://github.com/hougesen/crosspmv/pull/4)
 - feat: naive support for package.json [`#3`](https://github.com/hougesen/crosspmv/pull/3)
 - feat: add support for cargo workspaces [`#2`](https://github.com/hougesen/crosspmv/pull/2)

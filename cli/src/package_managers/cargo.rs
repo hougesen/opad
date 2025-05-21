@@ -18,11 +18,11 @@ fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &s
 
 #[inline]
 pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
-    let mut modified = false;
-
     let contents = std::fs::read_to_string(path)?;
 
     let mut document = contents.parse::<toml_edit::DocumentMut>()?;
+
+    let mut modified = false;
 
     if let Some(package_raw) = document.get_mut("package") {
         if let Some(package_table) = package_raw.as_table_like_mut() {
