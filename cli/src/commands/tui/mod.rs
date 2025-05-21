@@ -26,13 +26,38 @@ pub fn run_command() -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let version = inquire::Text::new("What do you wish to set the version to?").prompt()?;
+    let version = inquire::Text::new("What do you wish to set the version to?")
+        .with_validator(inquire::validator::MinLengthValidator::new(1))
+        .prompt()?;
+
+    let mut modified_files = Vec::new();
 
     for s in selected {
-        s.set_package_version(&version)?;
+        if s.set_package_version(&version)? {
+            modified_files.push(s);
+        }
     }
 
     println!("{}", "Files has been updated".bold().green());
+
+    let should_update_lock_files = inquire::Confirm::new("Do you wish to update the lock files?")
+        .with_default(false)
+        .prompt_skippable()?;
+
+    if should_update_lock_files.unwrap_or_default() {
+        for f in modified_files {
+            println!(
+                "{}",
+                format!("Updating lockfiles connected to {}", f.path.display())
+                    .blue()
+                    .bold()
+            );
+
+            if !f.update_lock_files()? {
+                eprintln!("{}", "Error updating lockfiles".bold().red());
+            }
+        }
+    }
 
     Ok(())
 }

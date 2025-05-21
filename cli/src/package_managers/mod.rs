@@ -6,11 +6,8 @@ mod pyproject;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PackageManager {
     CargoToml,
-
     DenoJson,
-
     PackageJson,
-
     PyProject,
 }
 
@@ -21,11 +18,8 @@ impl PackageManager {
             .and_then(|inner| inner.to_str())
             .and_then(|file_name| match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
-
                 "deno.json" => Some(Self::DenoJson),
-
                 "package.json" => Some(Self::PackageJson),
-
                 "pyproject.toml" => Some(Self::PyProject),
 
                 _ => None,
@@ -83,12 +77,23 @@ impl PackageManagerFile {
     pub fn set_package_version(&self, version: &str) -> anyhow::Result<bool> {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
-
             PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
-
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
-
             PackageManager::PyProject => pyproject::set_version(&self.path, version),
+        }
+    }
+
+    #[inline]
+    pub fn update_lock_files(&self) -> anyhow::Result<bool> {
+        let canon = self.path.canonicalize()?;
+
+        let dir = canon.parent().unwrap();
+
+        match self.package_manager {
+            PackageManager::CargoToml => cargo::update_lock_files(dir),
+            PackageManager::DenoJson => deno::update_lock_files(dir),
+            PackageManager::PackageJson => npm::update_lock_files(dir),
+            PackageManager::PyProject => pyproject::update_lock_files(dir),
         }
     }
 }

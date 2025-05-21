@@ -1,3 +1,5 @@
+use anyhow::Ok;
+
 #[inline]
 fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &str) -> bool {
     if package_table
@@ -45,4 +47,16 @@ pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::
     }
 
     Ok(modified)
+}
+
+#[inline]
+pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
+    let success = std::process::Command::new("cargo")
+        .arg("check")
+        .current_dir(path)
+        .spawn()?
+        .wait()?
+        .success();
+
+    Ok(success)
 }
