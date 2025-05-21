@@ -1,10 +1,13 @@
 mod cargo;
+mod deno;
 mod npm;
 mod pyproject;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PackageManager {
     CargoToml,
+
+    DenoJson,
 
     PackageJson,
 
@@ -18,6 +21,8 @@ impl PackageManager {
             .and_then(|inner| inner.to_str())
             .and_then(|file_name| match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
+
+                "deno.json" => Some(Self::DenoJson),
 
                 "package.json" => Some(Self::PackageJson),
 
@@ -79,6 +84,8 @@ impl PackageManagerFile {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
 
+            PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
+
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
 
             PackageManager::PyProject => pyproject::set_version(&self.path, version),
@@ -97,6 +104,7 @@ mod test_package_manager {
                 PackageManager::CargoToml,
                 std::path::Path::new("../Cargo.toml"),
             ),
+            (PackageManager::DenoJson, std::path::Path::new("deno.json")),
             (
                 PackageManager::PackageJson,
                 std::path::Path::new("package.json"),
