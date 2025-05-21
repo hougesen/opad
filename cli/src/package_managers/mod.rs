@@ -1,61 +1,30 @@
-mod cabal;
 mod cargo;
 mod npm;
 mod pyproject;
-mod stack;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PackageManager {
-    // cargo
     CargoToml,
 
-    // npm
     PackageJson,
 
-    // cabal
-    Cabal,
-
-    // stack
-    Stack,
-
-    // python
     PyProject,
 }
 
 impl PackageManager {
     #[inline]
     fn maybe_from_path(path: &std::path::Path) -> Option<Self> {
-        if let Some(file_name) = path.file_name().and_then(|inner| inner.to_str()) {
-            let pm = match file_name {
+        path.file_name()
+            .and_then(|inner| inner.to_str())
+            .and_then(|file_name| match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
 
                 "package.json" => Some(Self::PackageJson),
 
-                "package.yaml" => Some(Self::Stack),
-
                 "pyproject.toml" => Some(Self::PyProject),
 
                 _ => None,
-            };
-
-            if let Some(pm) = pm {
-                return Some(pm);
-            }
-        }
-
-        if let Some(ext) = path.extension().and_then(|inner| inner.to_str()) {
-            let pm = match ext {
-                "cabal" => Some(Self::Cabal),
-
-                _ => None,
-            };
-
-            if let Some(pm) = pm {
-                return Some(pm);
-            }
-        }
-
-        None
+            })
     }
 }
 
@@ -112,10 +81,6 @@ impl PackageManagerFile {
 
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
 
-            PackageManager::Cabal => cabal::set_version(&self.path, version),
-
-            PackageManager::Stack => stack::set_version(&self.path, version),
-
             PackageManager::PyProject => pyproject::set_version(&self.path, version),
         }
     }
@@ -133,16 +98,8 @@ mod test_package_manager {
                 std::path::Path::new("../Cargo.toml"),
             ),
             (
-                PackageManager::Stack,
-                std::path::Path::new("cli/package.yaml"),
-            ),
-            (
                 PackageManager::PackageJson,
                 std::path::Path::new("package.json"),
-            ),
-            (
-                PackageManager::Cabal,
-                std::path::Path::new("../../crosspmv.cabal"),
             ),
             (
                 PackageManager::PyProject,
