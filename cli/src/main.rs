@@ -9,16 +9,17 @@ mod package_managers;
 fn _main() -> anyhow::Result<()> {
     let files = find_package_manager_files(current_dir()?.as_path());
 
-    // println!("files: {files:?}");
-
-    let version = "1.2.3";
+    let version = "0.0.0";
 
     let results = files
         .into_iter()
-        .map(|x| x.set_package_version(version))
+        .map(|pm| {
+            let result = pm.set_package_version(version);
+            (pm, result)
+        })
         .collect::<Vec<_>>();
 
-    // println!("results: {results:?}");
+    println!("results: {results:#?}");
 
     Ok(())
 }

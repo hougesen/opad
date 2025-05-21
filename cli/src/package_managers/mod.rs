@@ -1,60 +1,72 @@
 mod cargo;
 
-#[derive(Debug)]
-pub enum PackageManagerFile {
+#[derive(Debug, Clone, Copy)]
+pub enum PackageManager {
     // cargo
-    CargoToml(std::path::PathBuf),
-    CargoLock(std::path::PathBuf),
+    CargoToml,
+    CargoLock,
 
     // npm
-    PackageJson(std::path::PathBuf),
-    PackageLockJson(std::path::PathBuf),
+    PackageJson,
+    PackageLockJson,
 
     // pnpm
-    PnpmLockYaml(std::path::PathBuf),
+    PnpmLockYaml,
 
     // yarn
-    YarnLock(std::path::PathBuf),
+    YarnLock,
+}
+
+impl PackageManager {
+    #[inline]
+    fn maybe_from_file_name(file_name: &str) -> Option<Self> {
+        match file_name {
+            "Cargo.toml" => Some(Self::CargoToml),
+            "Cargo.lock" => Some(Self::CargoLock),
+
+            "package.json" => Some(Self::PackageJson),
+            "package-lock.json" => Some(Self::PackageLockJson),
+
+            "pnpm-lock.yaml" => Some(Self::PnpmLockYaml),
+
+            "yarn.lock" => Some(Self::YarnLock),
+
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PackageManagerFile {
+    pub package_manager: PackageManager,
+
+    pub path: std::path::PathBuf,
 }
 
 impl PackageManagerFile {
     #[inline]
-    pub fn maybe_from_path(path: &std::path::Path) -> Option<PackageManagerFile> {
-        if let Some(file_name) = path
-            .file_name()
-            .map(|file_name| file_name.to_str())
-            .flatten()
-        {
-            match file_name {
-                "Cargo.toml" => Some(Self::CargoToml(path.to_path_buf())),
-                "Cargo.lock" => Some(Self::CargoLock(path.to_path_buf())),
-
-                "package.json" => Some(Self::PackageJson(path.to_path_buf())),
-                "package-lock.json" => Some(Self::PackageLockJson(path.to_path_buf())),
-
-                "pnpm-lock.yaml" => Some(Self::PnpmLockYaml(path.to_path_buf())),
-
-                "yarn.lock" => Some(Self::YarnLock(path.to_path_buf())),
-
-                _ => None,
-            }
-        } else {
-            None
-        }
+    pub fn maybe_from_path(path: &std::path::Path) -> Option<Self> {
+        path.file_name()
+            .and_then(|file_name| file_name.to_str())
+            .and_then(PackageManager::maybe_from_file_name)
+            .map(|package_manager| PackageManagerFile {
+                package_manager,
+                path: path.to_path_buf(),
+            })
     }
 
     #[inline]
     pub fn set_package_version(&self, version: &str) -> anyhow::Result<bool> {
-        match self {
-            Self::CargoToml(path) => cargo::set_cargo_toml_version(path, &version),
-            Self::CargoLock(_path) => Ok(false),
+        match self.package_manager {
+            PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
+            PackageManager::CargoLock => Ok(false),
 
-            Self::PackageJson(_path) => Ok(false),
-            Self::PackageLockJson(_path) => Ok(false),
+            PackageManager::PackageJson => Ok(false),
+            PackageManager::PackageLockJson => Ok(false),
 
-            Self::PnpmLockYaml(_path) => Ok(false),
+            PackageManager::PnpmLockYaml => Ok(false),
 
-            Self::YarnLock(_path) => Ok(false),
+            PackageManager::YarnLock => Ok(false),
         }
     }
 }
