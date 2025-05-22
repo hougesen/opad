@@ -32,6 +32,29 @@ pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool
 }
 
 #[inline]
-pub fn update_lock_files(_path: &std::path::Path) -> anyhow::Result<bool> {
-    todo!()
+pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
+    if path.join("uv.lock").exists() {
+        let exit_code = std::process::Command::new("uv")
+            .arg("lock")
+            .current_dir(path)
+            .spawn()?
+            .wait()?;
+
+        return Ok(exit_code.success());
+    }
+    if path.join("poetry.lock").exists() {
+        // TODO: update poetry lock file
+    }
+
+    if path.join("requirements.lock").exists() || path.join("requirements-dev.lock").exists() {
+        let exit_code = std::process::Command::new("rye")
+            .arg("lock")
+            .current_dir(path)
+            .spawn()?
+            .wait()?;
+
+        return Ok(exit_code.success());
+    }
+
+    Ok(false)
 }
