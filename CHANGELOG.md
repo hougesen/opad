@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- feat: prompt if lock files should be updated after [`#12`](https://github.com/hougesen/crosspmv/pull/12)
 - feat: support updating version of deno.json [`#11`](https://github.com/hougesen/crosspmv/pull/11)
 - test(npm): validate package.json is modified [`#9`](https://github.com/hougesen/crosspmv/pull/9)
 - feat: add support for pyproject.toml [`#5`](https://github.com/hougesen/crosspmv/pull/5)
