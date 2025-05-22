@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- feat: update version of gleam.toml [`#23`](https://github.com/hougesen/crosspmv/pull/23)
 - feat: update uv and rye lock files [`#14`](https://github.com/hougesen/crosspmv/pull/14)
 - test: setup code coverage [`#13`](https://github.com/hougesen/crosspmv/pull/13)
 - feat: prompt if lock files should be updated after [`#12`](https://github.com/hougesen/crosspmv/pull/12)
