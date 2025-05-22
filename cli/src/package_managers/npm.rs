@@ -1,5 +1,3 @@
-use anyhow::Ok;
-
 #[inline]
 pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;

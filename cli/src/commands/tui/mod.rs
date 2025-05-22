@@ -30,23 +30,19 @@ pub fn run_command() -> anyhow::Result<()> {
         .with_validator(inquire::validator::MinLengthValidator::new(1))
         .prompt()?;
 
-    let mut modified_files = Vec::new();
-
-    for s in selected {
-        if s.set_package_version(&version)? {
-            modified_files.push(s);
-        }
+    for s in &selected {
+        s.set_package_version(&version)?;
     }
 
     println!("{}", "Files has been updated".bold().green());
 
     let should_update_lock_files =
         inquire::Confirm::new("Do you wish to update the lock files? (experimental)")
-            .with_default(false)
+            .with_default(true)
             .prompt_skippable()?;
 
     if should_update_lock_files.unwrap_or_default() {
-        for f in modified_files {
+        for f in selected {
             println!(
                 "{}",
                 format!("Updating lockfiles connected to {}", f.path.display())
@@ -54,8 +50,22 @@ pub fn run_command() -> anyhow::Result<()> {
                     .bold()
             );
 
-            if !f.update_lock_files()? {
+            loop {
+                if f.update_lock_files()? {
+                    break;
+                }
+
                 eprintln!("{}", "Error updating lockfiles".bold().red());
+
+                let retry = inquire::Confirm::new("Do you wish to retry?")
+                    .with_default(false)
+                    .prompt_skippable()?;
+
+                println!("retry: {retry:?}");
+
+                if !retry.unwrap_or_default() {
+                    break;
+                }
             }
         }
     }

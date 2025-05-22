@@ -1,7 +1,6 @@
 #[inline]
 pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
-    println!("conents {contents}");
 
     let mut document = contents.parse::<toml_edit::DocumentMut>()?;
 

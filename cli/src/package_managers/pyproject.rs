@@ -42,9 +42,6 @@ pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
 
         return Ok(exit_code.success());
     }
-    if path.join("poetry.lock").exists() {
-        // TODO: update poetry lock file
-    }
 
     if path.join("requirements.lock").exists() || path.join("requirements-dev.lock").exists() {
         let exit_code = std::process::Command::new("rye")
@@ -56,7 +53,12 @@ pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
         return Ok(exit_code.success());
     }
 
-    Ok(false)
+    if path.join("poetry.lock").exists() {
+        // TODO: update poetry lock file?
+        // NOTE: does poetry.lock even include version of package?
+    }
+
+    Ok(true)
 }
 
 #[cfg(test)]
