@@ -1,0 +1,38 @@
+name: validate
+on:
+  push:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+jobs:
+  lint:
+    name: lint
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup component add rustfmt clippy
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - run: cargo fetch
+      - run: cargo fmt -- --check --color always
+      - run: cargo clippy
+      - run: cargo test
+      - name: Generate code coverage
+        run: cargo llvm-cov --all-features --all-targets --workspace --codecov --output-path codecov.json
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: codecov.json
+          slug: hougesen/crosspmv
+          token: ${{ secrets.CODECOV_TOKEN }}
