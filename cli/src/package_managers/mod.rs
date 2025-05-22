@@ -1,5 +1,6 @@
 mod cargo;
 mod deno;
+mod gleam;
 mod npm;
 mod pyproject;
 
@@ -7,6 +8,7 @@ mod pyproject;
 pub enum PackageManager {
     CargoToml,
     DenoJson,
+    GleamToml,
     PackageJson,
     PyProject,
 }
@@ -19,6 +21,7 @@ impl PackageManager {
             .and_then(|file_name| match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
                 "deno.json" => Some(Self::DenoJson),
+                "gleam.toml" => Some(Self::GleamToml),
                 "package.json" => Some(Self::PackageJson),
                 "pyproject.toml" => Some(Self::PyProject),
 
@@ -78,6 +81,7 @@ impl PackageManagerFile {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
             PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
+            PackageManager::GleamToml => gleam::set_version(&self.path, version),
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
             PackageManager::PyProject => pyproject::set_version(&self.path, version),
         }
@@ -92,6 +96,7 @@ impl PackageManagerFile {
         match self.package_manager {
             PackageManager::CargoToml => cargo::update_lock_files(dir),
             PackageManager::DenoJson => deno::update_lock_files(dir),
+            PackageManager::GleamToml => gleam::update_lock_files(dir),
             PackageManager::PackageJson => npm::update_lock_files(dir),
             PackageManager::PyProject => pyproject::update_lock_files(dir),
         }
@@ -110,6 +115,10 @@ mod test_package_manager {
                 std::path::Path::new("../Cargo.toml"),
             ),
             (PackageManager::DenoJson, std::path::Path::new("deno.json")),
+            (
+                PackageManager::GleamToml,
+                std::path::Path::new("gleam.toml"),
+            ),
             (
                 PackageManager::PackageJson,
                 std::path::Path::new("package.json"),

@@ -77,18 +77,11 @@ mod test_set_package_json_version {
 }
 ";
 
-        let expected_output = format!(
-            "{{
-  \"name\": \"npm\",
-  \"version\": \"{version}\",
-  \"main\": \"index.js\",
-  \"keywords\": [],
-  \"author\": \"\",
-  \"license\": \"ISC\",
-  \"description\": \"\"
-}}
-"
-        );
+        let new_version_line = format!("\"version\": \"{version}\"");
+
+        let expected_output = input.replacen("\"version\": \"0.0.0\"", &new_version_line, 1);
+
+        assert!(expected_output.contains(&new_version_line));
 
         let dir = tempfile::tempdir()?;
 
