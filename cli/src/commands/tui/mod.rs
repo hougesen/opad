@@ -40,9 +40,10 @@ pub fn run_command() -> anyhow::Result<()> {
 
     println!("{}", "Files has been updated".bold().green());
 
-    let should_update_lock_files = inquire::Confirm::new("Do you wish to update the lock files?")
-        .with_default(false)
-        .prompt_skippable()?;
+    let should_update_lock_files =
+        inquire::Confirm::new("Do you wish to update the lock files? (experimental)")
+            .with_default(false)
+            .prompt_skippable()?;
 
     if should_update_lock_files.unwrap_or_default() {
         for f in modified_files {
