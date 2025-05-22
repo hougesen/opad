@@ -58,3 +58,58 @@ pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
 
     Ok(false)
 }
+
+#[cfg(test)]
+mod test_set_version {
+    use super::set_version;
+
+    #[test]
+    fn it_should_modify_version() -> anyhow::Result<()> {
+        let version = "1.2.3";
+
+        let input = "[project]
+version = \"0.0.0\"
+name = \"uv-demo\"
+description = \"Add your description here\"
+readme = \"README.md\"
+requires-python = \">=3.13\"
+dependencies = []
+";
+
+        let new_version_line = format!("[project]\nversion = \"{version}\"");
+
+        let expected_output =
+            input.replacen("[project]\nversion = \"0.0.0\"", &new_version_line, 1);
+
+        assert!(expected_output.contains(&new_version_line));
+
+        let dir = tempfile::tempdir()?;
+
+        let path = dir.path().join("pyproject.toml");
+
+        std::fs::write(&path, input)?;
+
+        {
+            let modified = set_version(&path, version)?;
+
+            assert!(modified);
+
+            let output = std::fs::read_to_string(&path)?;
+
+            assert_eq!(output, expected_output);
+        };
+
+        // Validate we do not modify file if version is the same
+        {
+            let modified = set_version(&path, version)?;
+
+            assert!(!modified);
+
+            let output = std::fs::read_to_string(&path)?;
+
+            assert_eq!(output, expected_output);
+        }
+
+        Ok(())
+    }
+}

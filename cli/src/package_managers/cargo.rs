@@ -1,5 +1,3 @@
-use anyhow::Ok;
-
 #[inline]
 fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &str) -> bool {
     if package_table
@@ -59,4 +57,136 @@ pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
         .success();
 
     Ok(success)
+}
+
+#[cfg(test)]
+mod test_set_cargo_toml_version {
+    use crate::package_managers::cargo::set_cargo_toml_version;
+
+    #[test]
+    fn it_should_modify_version() -> anyhow::Result<()> {
+        let version = "1.2.3";
+
+        let input = r#"[package]
+version = "0.0.0"
+edition = "2024"
+homepage = "https://github.com/hougesen/crosspmv?tab=readme-ov-file"
+authors = ["Mads Hougesen <mads@mhouge.dk>"]
+license = "MIT"
+repository = "https://github.com/hougesen/crosspmv"
+documentation = "https://github.com/hougesen/crosspmv#readme"
+
+[dependencies]
+anyhow = "1.0.98"
+crossterm = "0.29.0"
+ignore = "0.4.23"
+inquire = "0.7.5"
+serde_json = { version = "1.0.140", features = ["preserve_order"] }
+tempfile = "3.20.0"
+toml_edit = "0.22.26"
+"#;
+
+        let new_version_line = format!("[package]\nversion = \"{version}\"");
+
+        let expected_output =
+            input.replacen("[package]\nversion = \"0.0.0\"", &new_version_line, 1);
+
+        assert!(expected_output.contains(&new_version_line));
+
+        let dir = tempfile::tempdir()?;
+
+        let path = dir.path().join("Cargo.toml");
+
+        std::fs::write(&path, input)?;
+
+        {
+            let modified = set_cargo_toml_version(&path, version)?;
+
+            assert!(modified);
+
+            let output = std::fs::read_to_string(&path)?;
+
+            assert_eq!(output, expected_output);
+        };
+
+        // Validate we do not modify file if version is the same
+        {
+            let modified = set_cargo_toml_version(&path, version)?;
+
+            assert!(!modified);
+
+            let output = std::fs::read_to_string(&path)?;
+
+            assert_eq!(output, expected_output);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn it_should_modify_version_workspace() -> anyhow::Result<()> {
+        let version = "1.2.3";
+
+        let input = r#"[workspace]
+members = ["cli"]
+resolver = "3"
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+homepage = "https://github.com/hougesen/crosspmv?tab=readme-ov-file"
+authors = ["Mads Hougesen <mads@mhouge.dk>"]
+license = "MIT"
+repository = "https://github.com/hougesen/crosspmv"
+documentation = "https://github.com/hougesen/crosspmv#readme"
+
+[workspace.dependencies]
+anyhow = "1.0.98"
+crossterm = "0.29.0"
+ignore = "0.4.23"
+inquire = "0.7.5"
+serde_json = { version = "1.0.140", features = ["preserve_order"] }
+tempfile = "3.20.0"
+toml_edit = "0.22.26"
+"#;
+
+        let new_version_line = format!("[workspace.package]\nversion = \"{version}\"");
+
+        let expected_output = input.replacen(
+            "[workspace.package]\nversion = \"0.0.0\"",
+            &new_version_line,
+            1,
+        );
+
+        assert!(expected_output.contains(&new_version_line));
+
+        let dir = tempfile::tempdir()?;
+
+        let path = dir.path().join("Cargo.toml");
+
+        std::fs::write(&path, input)?;
+
+        {
+            let modified = set_cargo_toml_version(&path, version)?;
+
+            assert!(modified);
+
+            let output = std::fs::read_to_string(&path)?;
+
+            assert_eq!(output, expected_output);
+        };
+
+        // Validate we do not modify file if version is the same
+        {
+            let modified = set_cargo_toml_version(&path, version)?;
+
+            assert!(!modified);
+
+            let output = std::fs::read_to_string(&path)?;
+
+            assert_eq!(output, expected_output);
+        }
+
+        Ok(())
+    }
 }
