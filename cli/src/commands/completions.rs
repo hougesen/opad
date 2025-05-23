@@ -1,17 +1,14 @@
 use clap::CommandFactory;
 
-use crate::cli::{Cli, Shell, ShellCompletionCommandArguments};
+use crate::cli::{Cli, Shell};
 
 #[inline]
-pub fn run_command(
-    args: &ShellCompletionCommandArguments,
-    buffer: &mut impl std::io::Write,
-) -> Result<(), std::io::Error> {
+pub fn run_command(shell: Shell, buffer: &mut impl std::io::Write) -> Result<(), std::io::Error> {
     let mut cmd = Cli::command();
 
     let cmd_name = cmd.get_name().to_string();
 
-    match args.shell {
+    match shell {
         Shell::Bash => {
             clap_complete::generate(clap_complete::Shell::Bash, &mut cmd, cmd_name, buffer);
         }
@@ -37,7 +34,7 @@ pub fn run_command(
 
 #[cfg(test)]
 mod test_run_command {
-    use crate::cli::{Shell, ShellCompletionCommandArguments};
+    use crate::cli::Shell;
 
     #[test]
     fn it_should_write_shell_completions() {
@@ -51,11 +48,9 @@ mod test_run_command {
         ];
 
         for shell in shells {
-            let args = ShellCompletionCommandArguments { shell };
-
             let mut buffer = Vec::new();
 
-            super::run_command(&args, &mut buffer).unwrap();
+            super::run_command(shell, &mut buffer).unwrap();
 
             assert!(!buffer.is_empty());
         }

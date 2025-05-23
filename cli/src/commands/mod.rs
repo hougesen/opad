@@ -1,6 +1,6 @@
 use clap::Parser;
 
-use crate::cli::{Cli, Commands, InteractiveCommandArguments};
+use crate::cli::Cli;
 
 mod completions;
 mod tui;
@@ -9,12 +9,10 @@ mod tui;
 pub fn execute_command() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    match cli.command {
-        Some(command) => match command {
-            Commands::Run(args) => tui::run_command(&args)?,
-            Commands::Completions(args) => completions::run_command(&args, &mut std::io::stdout())?,
-        },
-        None => tui::run_command(&InteractiveCommandArguments::default())?,
+    if let Some(shell) = cli.completions {
+        completions::run_command(shell, &mut std::io::stdout())?;
+    } else {
+        tui::run_command(&cli)?;
     }
 
     Ok(())
