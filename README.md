@@ -17,7 +17,7 @@ Easily manage package version across multiple package manager systems in mono re
 | `Python`                   | `poetry`        | `pyproject.toml` | n/a (`poetry.lock` does not include version)              |
 | `Gleam`                    | `gleam`         | `gleam.toml`     | n/a (`manifest.toml` does not include version)            |
 | `Dart`                     | `pub`           | `gleam.toml`     | n/a (`pubspec.lock` does not include version)             |
-| `crystal`                  | `shards`        | `shard.yml`      | n/a (`shard.lock` does not include version)               |
+| `Crystal`                  | `shards`        | `shard.yml`      | n/a (`shard.lock` does not include version)               |
 
 ## Disclaimer
 
