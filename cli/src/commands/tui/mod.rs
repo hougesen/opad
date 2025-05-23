@@ -1,12 +1,12 @@
 use crossterm::style::Stylize;
 
 use crate::{
-    cli::InteractiveCommandArguments,
+    cli::Cli,
     fs::{find_package_manager_files, setup_walker},
 };
 
 #[inline]
-pub fn run_command(args: &InteractiveCommandArguments) -> anyhow::Result<()> {
+pub fn run_command(args: &Cli) -> anyhow::Result<()> {
     let dir = std::env::current_dir()?;
 
     let walker = setup_walker(&dir, args.check_gitignored_files, args.check_hidden_files);

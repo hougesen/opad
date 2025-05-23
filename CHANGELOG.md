@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- feat: prompt version for each package [`#32`](https://github.com/hougesen/crosspmv/pull/32)
 - feat: shell completion command [`#31`](https://github.com/hougesen/crosspmv/pull/31)
 - refactor: remove yarn install command [`#30`](https://github.com/hougesen/crosspmv/pull/30)
 - feat: support crystal shards pm [`#29`](https://github.com/hougesen/crosspmv/pull/29)

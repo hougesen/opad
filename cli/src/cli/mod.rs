@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand};
+use clap::Parser;
 
 const HELP_TEMPLATE: &str = "\
 {before-help}{name} {version}
@@ -11,26 +11,21 @@ const HELP_TEMPLATE: &str = "\
 #[derive(Debug, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true, help_template = HELP_TEMPLATE)]
 pub struct Cli {
-    #[command(subcommand)]
-    pub command: Option<Commands>,
-}
-
-#[derive(Debug, Subcommand)]
-pub enum Commands {
-    /// Update package versions
-    Run(InteractiveCommandArguments),
-
-    /// Generate shell completions
-    Completions(ShellCompletionCommandArguments),
-}
-
-#[derive(Args, Debug, Default)]
-pub struct InteractiveCommandArguments {
+    /// Check hidden files/foldersfor support package managers files
+    ///
+    /// Default: `false`
     #[arg(long, default_value_t = false)]
     pub check_hidden_files: bool,
 
+    /// Check gitignored files/folders for support package managers files  
+    ///
+    /// Default: `false`
     #[arg(long, default_value_t = false)]
     pub check_gitignored_files: bool,
+
+    /// Generate shell completions
+    #[arg(long)]
+    pub completions: Option<Shell>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -78,10 +73,4 @@ impl clap::ValueEnum for Shell {
             Self::Zsh => clap::builder::PossibleValue::new("zsh"),
         })
     }
-}
-
-#[derive(Args, Debug)]
-pub struct ShellCompletionCommandArguments {
-    #[arg()]
-    pub shell: Shell,
 }
