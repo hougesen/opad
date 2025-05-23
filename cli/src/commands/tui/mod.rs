@@ -29,11 +29,17 @@ pub fn run_command(args: &InteractiveCommandArguments) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    let version = inquire::Text::new("What do you wish to set the version to?")
-        .with_validator(inquire::validator::MinLengthValidator::new(1))
-        .prompt()?;
+    let mut version = String::new();
 
     for s in &selected {
+        version = inquire::Text::new(&format!(
+            "{}: What do you wish to set the version to?",
+            s.path.display()
+        ))
+        .with_validator(inquire::validator::MinLengthValidator::new(1))
+        .with_initial_value(&version)
+        .prompt()?;
+
         s.set_package_version(&version)?;
     }
 
