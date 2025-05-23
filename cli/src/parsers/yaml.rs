@@ -54,7 +54,7 @@ name: Mads Hougesen
 "#;
 
     #[test]
-    fn it_should_support_comments() -> anyhow::Result<()> {
+    fn it_should_support_comments() -> Result<(), crate::error::Error> {
         let mut document = super::parse(INPUT)?;
 
         let mut output = String::new();

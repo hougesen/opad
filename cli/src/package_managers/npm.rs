@@ -3,7 +3,10 @@ use crate::parsers::json;
 use super::run_update_lock_file_command;
 
 #[inline]
-pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
+pub fn set_package_json_version(
+    path: &std::path::Path,
+    version: &str,
+) -> Result<bool, crate::error::Error> {
     let contents = std::fs::read_to_string(path)?;
 
     let mut document = json::parse(&contents)?;
@@ -85,7 +88,7 @@ mod test_set_package_json_version {
     use super::set_package_json_version;
 
     #[test]
-    fn it_should_modify_version() -> anyhow::Result<()> {
+    fn it_should_modify_version() -> Result<(), crate::error::Error> {
         let version = "1.2.3";
 
         let input = "{

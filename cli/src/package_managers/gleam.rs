@@ -1,7 +1,10 @@
 use crate::parsers::toml;
 
 #[inline]
-pub fn set_gleam_toml_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
+pub fn set_gleam_toml_version(
+    path: &std::path::Path,
+    version: &str,
+) -> Result<bool, crate::error::Error> {
     let contents = std::fs::read_to_string(path)?;
 
     let mut document = toml::parse(&contents)?;
@@ -41,7 +44,7 @@ mod test_set_version {
     use super::set_gleam_toml_version;
 
     #[test]
-    fn it_should_modify_version() -> anyhow::Result<()> {
+    fn it_should_modify_version() -> Result<(), crate::error::Error> {
         let version = "1.2.3";
 
         let input = r#"name = "sgleam_demo"

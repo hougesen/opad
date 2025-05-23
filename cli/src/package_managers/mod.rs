@@ -98,7 +98,7 @@ impl PackageManagerFile {
     }
 
     #[inline]
-    pub fn set_package_version(&self, version: &str) -> anyhow::Result<bool> {
+    pub fn set_package_version(&self, version: &str) -> Result<bool, crate::error::Error> {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
             PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
@@ -112,7 +112,7 @@ impl PackageManagerFile {
     }
 
     #[inline]
-    pub fn update_lock_files(&self) -> anyhow::Result<bool> {
+    pub fn update_lock_files(&self) -> std::io::Result<bool> {
         let canon = self.path.canonicalize()?;
 
         let dir = canon.parent().unwrap_or(&self.path);

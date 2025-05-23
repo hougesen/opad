@@ -1,7 +1,10 @@
 use crate::parsers::yaml;
 
 #[inline]
-pub fn set_pubspec_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
+pub fn set_pubspec_version(
+    path: &std::path::Path,
+    version: &str,
+) -> Result<bool, crate::error::Error> {
     let mut contents = std::fs::read_to_string(path)?;
 
     let document = yaml::parse(&contents)?;
@@ -150,7 +153,7 @@ flutter:
 "#;
 
     #[test]
-    fn it_should_update_version() -> anyhow::Result<()> {
+    fn it_should_update_version() -> Result<(), crate::error::Error> {
         let version = "2025.05.23+1722";
 
         let new_version_line = format!("version: {version}");
@@ -177,7 +180,7 @@ flutter:
     }
 
     #[test]
-    fn it_support_multiline_strings() -> anyhow::Result<()> {
+    fn it_support_multiline_strings() -> Result<(), crate::error::Error> {
         let input = INPUT.replace("version: 1.0.7+21", "version:\n   1.0.7+21");
 
         let version = "2025.05.23+1722";
