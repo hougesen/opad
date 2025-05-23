@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- refactor(deps): remove anyhow [`#35`](https://github.com/hougesen/crosspmv/pull/35)
 - feat: add support for updating elm.json [`#34`](https://github.com/hougesen/crosspmv/pull/34)
 - refactor(cli): flatten to single command [`#33`](https://github.com/hougesen/crosspmv/pull/33)
 - feat: prompt version for each package [`#32`](https://github.com/hougesen/crosspmv/pull/32)

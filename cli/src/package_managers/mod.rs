@@ -1,4 +1,4 @@
-mod cargo;
+pub mod cargo;
 mod crystal;
 mod deno;
 mod elm;

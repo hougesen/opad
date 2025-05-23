@@ -1,5 +1,6 @@
 #[derive(Debug)]
 pub enum Error {
+    CargoToml(crate::package_managers::cargo::CargoTomlError),
     Inquire(inquire::InquireError),
     Io(std::io::Error),
     MarkedYaml(Box<marked_yaml::LoadError>),
@@ -13,6 +14,7 @@ impl core::fmt::Display for Error {
     #[inline]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
+            Self::CargoToml(error) => error.fmt(f),
             Self::Inquire(error) => error.fmt(f),
             Self::Io(error) => error.fmt(f),
             Self::MarkedYaml(error) => error.fmt(f),
@@ -51,7 +53,15 @@ impl From<toml_edit::TomlError> for Error {
 }
 
 impl From<serde_json::Error> for Error {
+    #[inline]
     fn from(value: serde_json::Error) -> Self {
         Self::SerdeJson(Box::new(value))
+    }
+}
+
+impl From<crate::package_managers::cargo::CargoTomlError> for Error {
+    #[inline]
+    fn from(value: crate::package_managers::cargo::CargoTomlError) -> Self {
+        Self::CargoToml(value)
     }
 }

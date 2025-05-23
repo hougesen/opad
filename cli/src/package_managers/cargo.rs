@@ -2,22 +2,86 @@ use crate::parsers::toml;
 
 use super::run_update_lock_file_command;
 
-#[inline]
-fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &str) -> bool {
-    if package_table
-        .get("version")
-        .is_some_and(|outer| outer.as_str().is_some_and(|inner| inner != version))
-    {
-        package_table.insert(
-            "version",
-            toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
-                version.into(),
-            ))),
-        );
-        true
-    } else {
-        false
+#[derive(Debug)]
+pub enum CargoTomlError {
+    InvalidPackageKeyDataType { workspace: bool },
+    InvalidVersionKeyDataType { workspace: bool },
+    InvalidWorkspaceKeyDataType,
+    MissingPackageField { workspace: bool },
+    MissingVersionKey { workspace: bool },
+}
+
+impl core::error::Error for CargoTomlError {}
+
+impl core::fmt::Display for CargoTomlError {
+    #[inline]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::InvalidVersionKeyDataType { workspace } => {
+                let field = if *workspace {
+                    "\"workspace.package.version\""
+                } else {
+                    "\"package.version\""
+                };
+
+                write!(f, "{field} is not a string")
+            }
+            Self::InvalidPackageKeyDataType { workspace } => {
+                let field = if *workspace {
+                    "\"workspace.package\""
+                } else {
+                    "\"package\""
+                };
+
+                write!(f, "{field} is not a table")
+            }
+            Self::MissingVersionKey { workspace } => {
+                let field = if *workspace {
+                    "\"workspace.package.version\""
+                } else {
+                    "\"package.version\""
+                };
+
+                write!(f, "{field} not found")
+            }
+            Self::MissingPackageField { workspace } => {
+                let field = if *workspace {
+                    "\"workspace.package\""
+                } else {
+                    "\"package\""
+                };
+
+                write!(f, "{field} not found")
+            }
+            Self::InvalidWorkspaceKeyDataType => write!(f, "\"workspace\" is not a table"),
+        }
     }
+}
+
+#[inline]
+fn set_package_version(
+    package_table: &mut dyn toml_edit::TableLike,
+    version: &str,
+    workspace: bool,
+) -> Result<bool, CargoTomlError> {
+    let version_key = package_table
+        .get("version")
+        .ok_or(CargoTomlError::MissingVersionKey { workspace })?;
+
+    let version_key_str = version_key
+        .as_str()
+        .ok_or(CargoTomlError::InvalidVersionKeyDataType { workspace })?;
+
+    let modified = version_key_str != version;
+
+    package_table.insert(
+        "version",
+        toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
+            version.into(),
+        ))),
+    );
+
+    Ok(modified)
 }
 
 #[inline]
@@ -31,20 +95,30 @@ pub fn set_cargo_toml_version(
 
     let mut modified = false;
 
-    if let Some(package_raw) = document.get_mut("package") {
-        if let Some(package_table) = package_raw.as_table_like_mut() {
-            modified |= set_package_version(package_table, version);
-        }
-    }
-
     if let Some(workspace) = document.get_mut("workspace") {
-        if let Some(workspace_table) = workspace.as_table_like_mut() {
-            if let Some(package) = workspace_table.get_mut("package") {
-                if let Some(package_table) = package.as_table_like_mut() {
-                    modified |= set_package_version(package_table, version);
-                }
-            }
-        }
+        let workspace_table = workspace
+            .as_table_like_mut()
+            .ok_or(CargoTomlError::InvalidWorkspaceKeyDataType)?;
+
+        let package = workspace_table
+            .get_mut("package")
+            .ok_or(CargoTomlError::MissingPackageField { workspace: true })?;
+
+        let package_table = package
+            .as_table_like_mut()
+            .ok_or(CargoTomlError::InvalidPackageKeyDataType { workspace: true })?;
+
+        modified |= set_package_version(package_table, version, true)?;
+    } else if let Some(package_raw) = document.get_mut("package") {
+        let package_table = package_raw
+            .as_table_like_mut()
+            .ok_or(CargoTomlError::InvalidPackageKeyDataType { workspace: false })?;
+
+        modified |= set_package_version(package_table, version, false)?;
+    } else {
+        return Err(crate::error::Error::from(
+            CargoTomlError::MissingPackageField { workspace: false },
+        ));
     }
 
     if modified {
