@@ -1,3 +1,5 @@
+use crate::parsers::toml;
+
 #[inline]
 fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &str) -> bool {
     if package_table
@@ -7,7 +9,7 @@ fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &s
         package_table.insert(
             "version",
             toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
-                version.to_string(),
+                version.into(),
             ))),
         );
         true
@@ -20,7 +22,7 @@ fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &s
 pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
 
-    let mut document = contents.parse::<toml_edit::DocumentMut>()?;
+    let mut document = toml::parse(&contents)?;
 
     let mut modified = false;
 
@@ -41,22 +43,20 @@ pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::
     }
 
     if modified {
-        std::fs::write(path, document.to_string())?;
+        toml::save(path, &document)?;
     }
 
     Ok(modified)
 }
 
 #[inline]
-pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
-    let success = std::process::Command::new("cargo")
+pub fn update_lock_files(path: &std::path::Path) -> std::io::Result<bool> {
+    std::process::Command::new("cargo")
         .arg("check")
         .current_dir(path)
         .spawn()?
-        .wait()?
-        .success();
-
-    Ok(success)
+        .wait()
+        .map(|exit_code| exit_code.success())
 }
 
 #[cfg(test)]

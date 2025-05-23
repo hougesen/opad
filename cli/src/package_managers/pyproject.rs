@@ -1,8 +1,10 @@
+use crate::parsers::toml;
+
 #[inline]
 pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
 
-    let mut document = contents.parse::<toml_edit::DocumentMut>()?;
+    let mut document = toml::parse(&contents)?;
 
     let mut modified = false;
 
@@ -16,7 +18,7 @@ pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool
                 package_table.insert(
                     "version",
                     toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
-                        version.to_string(),
+                        version.into(),
                     ))),
                 );
                 modified = true;
@@ -25,32 +27,30 @@ pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool
     }
 
     if modified {
-        std::fs::write(path, document.to_string())?;
+        toml::save(path, &document)?;
     }
 
     Ok(modified)
 }
 
 #[inline]
-pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
+pub fn update_lock_files(path: &std::path::Path) -> std::io::Result<bool> {
     if path.join("uv.lock").exists() {
-        let exit_code = std::process::Command::new("uv")
+        return std::process::Command::new("uv")
             .arg("lock")
             .current_dir(path)
             .spawn()?
-            .wait()?;
-
-        return Ok(exit_code.success());
+            .wait()
+            .map(|exit_code| exit_code.success());
     }
 
     if path.join("requirements.lock").exists() || path.join("requirements-dev.lock").exists() {
-        let exit_code = std::process::Command::new("rye")
+        return std::process::Command::new("rye")
             .arg("lock")
             .current_dir(path)
             .spawn()?
-            .wait()?;
-
-        return Ok(exit_code.success());
+            .wait()
+            .map(|exit_code| exit_code.success());
     }
 
     if path.join("poetry.lock").exists() {
@@ -58,6 +58,7 @@ pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
         // NOTE: does poetry.lock even include version of package?
     }
 
+    // should this be false?
     Ok(true)
 }
 

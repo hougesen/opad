@@ -93,13 +93,15 @@ impl PackageManagerFile {
 
         let dir = canon.parent().unwrap();
 
-        match self.package_manager {
-            PackageManager::CargoToml => cargo::update_lock_files(dir),
-            PackageManager::DenoJson => deno::update_lock_files(dir),
+        let success = match self.package_manager {
+            PackageManager::CargoToml => cargo::update_lock_files(dir)?,
+            PackageManager::DenoJson => deno::update_lock_files(dir)?,
             PackageManager::GleamToml => gleam::update_lock_files(dir),
-            PackageManager::PackageJson => npm::update_lock_files(dir),
-            PackageManager::PyProject => pyproject::update_lock_files(dir),
-        }
+            PackageManager::PackageJson => npm::update_lock_files(dir)?,
+            PackageManager::PyProject => pyproject::update_lock_files(dir)?,
+        };
+
+        Ok(success)
     }
 }
 
