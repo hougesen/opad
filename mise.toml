@@ -9,6 +9,7 @@ run = [
   "taplo format",
   "mise fmt",
   "cargo fmt",
+  "mdsf format --cache .",
   "npx --yes prettier@latest --write --cache .",
 ]
 
