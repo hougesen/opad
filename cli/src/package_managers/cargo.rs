@@ -1,5 +1,7 @@
 use crate::parsers::toml;
 
+use super::run_update_lock_file_command;
+
 #[inline]
 fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &str) -> bool {
     if package_table
@@ -50,13 +52,15 @@ pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::
 }
 
 #[inline]
-pub fn update_lock_files(path: &std::path::Path) -> std::io::Result<bool> {
-    std::process::Command::new("cargo")
-        .arg("check")
-        .current_dir(path)
-        .spawn()?
-        .wait()
-        .map(|exit_code| exit_code.success())
+fn cargo_update_lock_file_command() -> std::process::Command {
+    let mut cmd = std::process::Command::new("cargo");
+    cmd.arg("check");
+    cmd
+}
+
+#[inline]
+pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
+    run_update_lock_file_command(cargo_update_lock_file_command(), dir)
 }
 
 #[cfg(test)]

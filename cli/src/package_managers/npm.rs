@@ -1,5 +1,7 @@
 use crate::parsers::json;
 
+use super::run_update_lock_file_command;
+
 #[inline]
 pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
@@ -30,30 +32,52 @@ pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow
 }
 
 #[inline]
-pub fn update_lock_files(path: &std::path::Path) -> std::io::Result<bool> {
-    let mut command = if path.join("pnpm-lock.yaml").exists() {
-        let mut cmd = std::process::Command::new("pnpm");
-        cmd.arg("install");
-        cmd
-    } else if path.join("bun.lockb").exists() {
-        let mut cmd = std::process::Command::new("bun");
-        cmd.arg("install");
-        cmd
-    } else if path.join("yarn.lock").exists() {
-        let mut cmd = std::process::Command::new("yarn");
-        cmd.arg("install");
-        cmd
-    } else {
-        let mut cmd = std::process::Command::new("npm");
-        cmd.arg("install");
-        cmd
-    };
+fn bun_enabled(dir: &std::path::Path) -> bool {
+    dir.join("bun.lock").exists() || dir.join("bun.lockb").exists()
+}
 
-    command
-        .current_dir(path)
-        .spawn()?
-        .wait()
-        .map(|exit_code| exit_code.success())
+#[inline]
+fn yarn_enabled(dir: &std::path::Path) -> bool {
+    dir.join("yarn.lock").exists()
+}
+
+#[inline]
+fn pnpm_enabled(dir: &std::path::Path) -> bool {
+    dir.join("pnpm-lock.yaml").exists() || dir.join("pnpm-lock.yml").exists()
+}
+
+#[inline]
+fn npm_update_lock_file_command() -> std::process::Command {
+    let mut cmd = std::process::Command::new("npm");
+    cmd.arg("install");
+    cmd
+}
+
+#[inline]
+fn bun_update_lock_file_command() -> std::process::Command {
+    let mut cmd = std::process::Command::new("bun");
+    cmd.arg("install");
+    cmd
+}
+
+#[inline]
+fn pnpm_update_lock_file_command() -> std::process::Command {
+    let mut cmd = std::process::Command::new("pnpm");
+    cmd.arg("install");
+    cmd
+}
+
+#[inline]
+pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
+    if pnpm_enabled(dir) {
+        run_update_lock_file_command(pnpm_update_lock_file_command(), dir)
+    } else if bun_enabled(dir) {
+        run_update_lock_file_command(bun_update_lock_file_command(), dir)
+    } else if yarn_enabled(dir) {
+        return Ok(true);
+    } else {
+        run_update_lock_file_command(npm_update_lock_file_command(), dir)
+    }
 }
 
 #[cfg(test)]
