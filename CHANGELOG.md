@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- refactor: standardize serializing and deserializing [`#27`](https://github.com/hougesen/crosspmv/pull/27)
 - docs: support package managers table [`#26`](https://github.com/hougesen/crosspmv/pull/26)
 - feat: ask if retry on lock file error [`#25`](https://github.com/hougesen/crosspmv/pull/25)
 - feat: update version of gleam.toml [`#23`](https://github.com/hougesen/crosspmv/pull/23)

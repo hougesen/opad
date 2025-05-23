@@ -61,8 +61,6 @@ pub fn run_command() -> anyhow::Result<()> {
                     .with_default(false)
                     .prompt_skippable()?;
 
-                println!("retry: {retry:?}");
-
                 if !retry.unwrap_or_default() {
                     break;
                 }

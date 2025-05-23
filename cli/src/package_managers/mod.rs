@@ -2,6 +2,7 @@ mod cargo;
 mod deno;
 mod gleam;
 mod npm;
+mod pubspec;
 mod pyproject;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -11,6 +12,7 @@ pub enum PackageManager {
     GleamToml,
     PackageJson,
     PyProject,
+    Pubspec,
 }
 
 impl PackageManager {
@@ -24,6 +26,7 @@ impl PackageManager {
                 "gleam.toml" => Some(Self::GleamToml),
                 "package.json" => Some(Self::PackageJson),
                 "pyproject.toml" => Some(Self::PyProject),
+                "pubspec.yaml" => Some(Self::Pubspec),
 
                 _ => None,
             })
@@ -84,6 +87,7 @@ impl PackageManagerFile {
             PackageManager::GleamToml => gleam::set_version(&self.path, version),
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
             PackageManager::PyProject => pyproject::set_version(&self.path, version),
+            PackageManager::Pubspec => pubspec::set_version(&self.path, version),
         }
     }
 
@@ -99,6 +103,7 @@ impl PackageManagerFile {
             PackageManager::GleamToml => gleam::update_lock_files(dir),
             PackageManager::PackageJson => npm::update_lock_files(dir)?,
             PackageManager::PyProject => pyproject::update_lock_files(dir)?,
+            PackageManager::Pubspec => pubspec::update_lock_files(dir),
         };
 
         Ok(success)

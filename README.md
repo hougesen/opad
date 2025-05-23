@@ -4,18 +4,19 @@ Easily manage package version across multiple package manager systems in mono re
 
 ## Supported package management systems
 
-| Package manager           | Update lock file command                                  |
-| ------------------------- | --------------------------------------------------------- |
-| cargo (`Cargo.toml`)      | `cargo check` (`Cargo.lock`)                              |
-| npm (`package.json`)      | `npm install` (`package-lock.json`)                       |
-| pnpm (`package.json`)     | `pnpm install` (`pnpm-lock.yam`)                          |
-| yarn (`package.json`)     | `yarn install` (`yarn.lock`)                              |
-| bun (`package.json`)      | `bun install` (`bun.lockb`)                               |
-| deno (`deno.json`)        | `deno install` (`deno.lock`)                              |
-| uv (`pyproject.toml`)     | `uv lock` (`uv.lock`)                                     |
-| rye (`pyproject.toml`)    | `rye lock` (`requirements.lock`, `requirements-dev.lock`) |
-| poetry (`pyproject.toml`) | n/a (`poetry.lock` does not include version)              |
-| gleam (`gleam.toml`)      | n/a (`manifest.toml` does not include version)            |
+| Language                   | Package manager | File             | Update lock file command                                  |
+| -------------------------- | --------------- | ---------------- | --------------------------------------------------------- |
+| `Rust`                     | `cargo`         | `Cargo.toml`     | `cargo check` (`Cargo.lock`)                              |
+| `JavaScript`, `TypeScript` | `npm`           | `package.json`   | `npm install` (`package-lock.json`)                       |
+| `JavaScript`, `TypeScript` | `pnpm`          | `package.json`   | `pnpm install` (`pnpm-lock.yam`)                          |
+| `JavaScript`, `TypeScript` | `yarn`          | `package.json`   | `yarn install` (`yarn.lock`)                              |
+| `JavaScript`, `TypeScript` | `bun`           | `package.json`   | `bun install` (`bun.lockb`)                               |
+| `JavaScript`, `TypeScript` | `deno`          | `deno.json`      | `deno install` (`deno.lock`)                              |
+| `Python`                   | `uv`            | `pyproject.toml` | `uv lock` (`uv.lock`)                                     |
+| `Python`                   | `rye`           | `pyproject.toml` | `rye lock` (`requirements.lock`, `requirements-dev.lock`) |
+| `Python`                   | `poetry`        | `pyproject.toml` | n/a (`poetry.lock` does not include version)              |
+| `Gleam`                    | `gleam`         | `gleam.toml`     | n/a (`manifest.toml` does not include version)            |
+| `Dart`                     | `pub`           | `gleam.toml`     | n/a (`pubspec.lock` does not include version)             |
 
 ## Disclaimer
 
