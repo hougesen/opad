@@ -10,10 +10,9 @@ keywords = ["monorepository"]
 homepage = { workspace = true }
 readme = { workspace = true }
 documentation = { workspace = true }
-categories = ["development-tools", "command-line-utilities"]
+categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
-anyhow = { workspace = true }
 clap = { workspace = true }
 clap_complete = { workspace = true }
 clap_complete_nushell = { workspace = true }

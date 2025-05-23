@@ -21,7 +21,10 @@ fn set_package_version(package_table: &mut dyn toml_edit::TableLike, version: &s
 }
 
 #[inline]
-pub fn set_cargo_toml_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
+pub fn set_cargo_toml_version(
+    path: &std::path::Path,
+    version: &str,
+) -> Result<bool, crate::error::Error> {
     let contents = std::fs::read_to_string(path)?;
 
     let mut document = toml::parse(&contents)?;
@@ -68,7 +71,7 @@ mod test_set_cargo_toml_version {
     use crate::package_managers::cargo::set_cargo_toml_version;
 
     #[test]
-    fn it_should_modify_version() -> anyhow::Result<()> {
+    fn it_should_modify_version() -> Result<(), crate::error::Error> {
         let version = "1.2.3";
 
         let input = r#"[package]
@@ -81,7 +84,6 @@ repository = "https://github.com/hougesen/crosspmv"
 documentation = "https://github.com/hougesen/crosspmv#readme"
 
 [dependencies]
-anyhow = "1.0.98"
 crossterm = "0.29.0"
 ignore = "0.4.23"
 inquire = "0.7.5"
@@ -128,7 +130,7 @@ toml_edit = "0.22.26"
     }
 
     #[test]
-    fn it_should_modify_version_workspace() -> anyhow::Result<()> {
+    fn it_should_modify_version_workspace() -> Result<(), crate::error::Error> {
         let version = "1.2.3";
 
         let input = r#"[workspace]
@@ -145,7 +147,6 @@ repository = "https://github.com/hougesen/crosspmv"
 documentation = "https://github.com/hougesen/crosspmv#readme"
 
 [workspace.dependencies]
-anyhow = "1.0.98"
 crossterm = "0.29.0"
 ignore = "0.4.23"
 inquire = "0.7.5"

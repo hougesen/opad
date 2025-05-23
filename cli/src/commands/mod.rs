@@ -6,7 +6,7 @@ mod completions;
 mod tui;
 
 #[inline]
-pub fn execute_command() -> anyhow::Result<()> {
+pub fn execute_command() -> Result<(), crate::error::Error> {
     let cli = Cli::parse();
 
     if let Some(shell) = cli.completions {

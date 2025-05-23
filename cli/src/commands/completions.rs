@@ -3,7 +3,7 @@ use clap::CommandFactory;
 use crate::cli::{Cli, Shell};
 
 #[inline]
-pub fn run_command(shell: Shell, buffer: &mut impl std::io::Write) -> Result<(), std::io::Error> {
+pub fn run_command(shell: Shell, buffer: &mut impl std::io::Write) -> std::io::Result<()> {
     let mut cmd = Cli::command();
 
     let cmd_name = cmd.get_name().to_string();

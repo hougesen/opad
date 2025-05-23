@@ -6,7 +6,7 @@ use crate::{
 };
 
 #[inline]
-pub fn run_command(args: &Cli) -> anyhow::Result<()> {
+pub fn run_command(args: &Cli) -> Result<(), crate::error::Error> {
     let dir = std::env::current_dir()?;
 
     let walker = setup_walker(&dir, args.check_gitignored_files, args.check_hidden_files);

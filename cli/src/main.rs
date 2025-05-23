@@ -2,6 +2,7 @@ use crossterm::style::Stylize;
 
 mod cli;
 mod commands;
+mod error;
 mod fs;
 mod package_managers;
 mod parsers;

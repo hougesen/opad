@@ -13,7 +13,7 @@ pub fn save(path: &std::path::Path, document: &toml_edit::DocumentMut) -> std::i
 #[cfg(test)]
 mod test_parse {
     #[test]
-    fn it_should_keep_comments() -> anyhow::Result<()> {
+    fn it_should_keep_comments() -> Result<(), toml_edit::TomlError> {
         let input = "# this is a comment
 key = \"value\"
 ";
