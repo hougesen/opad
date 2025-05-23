@@ -1,6 +1,7 @@
 mod cargo;
 mod crystal;
 mod deno;
+mod elm;
 mod gleam;
 mod npm;
 mod pubspec;
@@ -21,12 +22,13 @@ fn run_update_lock_file_command(
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PackageManager {
     CargoToml,
-    CrystalShards,
-    DartPubspec,
     DenoJson,
+    ElmJson,
     GleamToml,
     PackageJson,
-    PyProject,
+    PubspecYaml,
+    PyProjectToml,
+    ShardYml,
 }
 
 impl PackageManager {
@@ -37,11 +39,12 @@ impl PackageManager {
             .and_then(|file_name| match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
                 "deno.json" | "deno.json5" | "deno.jsonc" => Some(Self::DenoJson),
+                "elm.json" | "elm.json5" | "elm.jsonc" => Some(Self::ElmJson),
                 "gleam.toml" => Some(Self::GleamToml),
                 "package.json" | "package.json5" | "package.jsonc" => Some(Self::PackageJson),
-                "pubspec.yaml" | "pubspec.yml" => Some(Self::DartPubspec),
-                "pyproject.toml" => Some(Self::PyProject),
-                "shard.yaml" | "shard.yml" => Some(Self::CrystalShards),
+                "pubspec.yaml" | "pubspec.yml" => Some(Self::PubspecYaml),
+                "pyproject.toml" => Some(Self::PyProjectToml),
+                "shard.yaml" | "shard.yml" => Some(Self::ShardYml),
 
                 _ => None,
             })
@@ -98,12 +101,13 @@ impl PackageManagerFile {
     pub fn set_package_version(&self, version: &str) -> anyhow::Result<bool> {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
-            PackageManager::CrystalShards => crystal::set_shard_yml_version(&self.path, version),
-            PackageManager::DartPubspec => pubspec::set_pubspec_version(&self.path, version),
             PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
+            PackageManager::ElmJson => elm::set_elm_json_version(&self.path, version),
             PackageManager::GleamToml => gleam::set_gleam_toml_version(&self.path, version),
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
-            PackageManager::PyProject => pyproject::set_version(&self.path, version),
+            PackageManager::PubspecYaml => pubspec::set_pubspec_version(&self.path, version),
+            PackageManager::PyProjectToml => pyproject::set_version(&self.path, version),
+            PackageManager::ShardYml => crystal::set_shard_yml_version(&self.path, version),
         }
     }
 
@@ -111,16 +115,17 @@ impl PackageManagerFile {
     pub fn update_lock_files(&self) -> anyhow::Result<bool> {
         let canon = self.path.canonicalize()?;
 
-        let dir = canon.parent().unwrap();
+        let dir = canon.parent().unwrap_or(&self.path);
 
         let success = match self.package_manager {
             PackageManager::CargoToml => cargo::update_lock_files(dir)?,
-            PackageManager::CrystalShards => crystal::update_lock_files(dir),
-            PackageManager::DartPubspec => pubspec::update_lock_files(dir),
             PackageManager::DenoJson => deno::update_lock_files(dir)?,
+            PackageManager::ElmJson => elm::update_lock_files(dir),
             PackageManager::GleamToml => gleam::update_lock_files(dir),
             PackageManager::PackageJson => npm::update_lock_files(dir)?,
-            PackageManager::PyProject => pyproject::update_lock_files(dir)?,
+            PackageManager::PubspecYaml => pubspec::update_lock_files(dir),
+            PackageManager::PyProjectToml => pyproject::update_lock_files(dir)?,
+            PackageManager::ShardYml => crystal::update_lock_files(dir),
         };
 
         Ok(success)
@@ -139,6 +144,7 @@ mod test_package_manager {
                 std::path::Path::new("../Cargo.toml"),
             ),
             (PackageManager::DenoJson, std::path::Path::new("deno.json")),
+            (PackageManager::ElmJson, std::path::Path::new("elm.json")),
             (
                 PackageManager::GleamToml,
                 std::path::Path::new("gleam.toml"),
@@ -148,9 +154,14 @@ mod test_package_manager {
                 std::path::Path::new("package.json"),
             ),
             (
-                PackageManager::PyProject,
+                PackageManager::PubspecYaml,
+                std::path::Path::new("pubspec.yaml"),
+            ),
+            (
+                PackageManager::PyProjectToml,
                 std::path::Path::new("pyproject.toml"),
             ),
+            (PackageManager::ShardYml, std::path::Path::new("shard.yml")),
         ];
 
         for (package_manager, path) in expected_results {
