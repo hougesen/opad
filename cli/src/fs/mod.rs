@@ -1,16 +1,23 @@
 use crate::package_managers::PackageManagerFile;
 
 #[inline]
-fn setup_walker(path: &std::path::Path) -> ignore::Walk {
+pub fn setup_walker(
+    path: &std::path::Path,
+    check_gitignored_files: bool,
+    check_hidden_files: bool,
+) -> ignore::Walk {
     ignore::WalkBuilder::new(path)
-        .git_ignore(true)
-        .hidden(true)
+        .git_ignore(!check_gitignored_files)
+        .hidden(!check_hidden_files)
         .build()
 }
 
 #[inline]
-pub fn find_package_manager_files(path: &std::path::Path) -> Vec<PackageManagerFile> {
-    let mut files = setup_walker(path)
+pub fn find_package_manager_files(
+    walker: ignore::Walk,
+    path: &std::path::Path,
+) -> Vec<PackageManagerFile> {
+    let mut files = walker
         .flatten()
         .filter_map(|entry| {
             let inner = entry

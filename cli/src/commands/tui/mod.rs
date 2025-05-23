@@ -1,14 +1,17 @@
-use std::env::current_dir;
-
 use crossterm::style::Stylize;
 
-use crate::fs::find_package_manager_files;
+use crate::{
+    cli::InteractiveCommandArguments,
+    fs::{find_package_manager_files, setup_walker},
+};
 
 #[inline]
-pub fn run_command() -> anyhow::Result<()> {
-    let dir = current_dir()?;
+pub fn run_command(args: &InteractiveCommandArguments) -> anyhow::Result<()> {
+    let dir = std::env::current_dir()?;
 
-    let files = find_package_manager_files(&dir);
+    let walker = setup_walker(&dir, args.check_gitignored_files, args.check_hidden_files);
+
+    let files = find_package_manager_files(walker, &dir);
 
     if files.is_empty() {
         println!("{}", "No supported package managers found".yellow().bold());
