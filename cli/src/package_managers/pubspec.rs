@@ -1,7 +1,7 @@
 use crate::parsers::yaml;
 
 #[inline]
-pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
+pub fn set_pubspec_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let mut contents = std::fs::read_to_string(path)?;
 
     let document = yaml::parse(&contents)?;
@@ -28,7 +28,7 @@ pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool
 }
 
 #[inline]
-pub const fn update_lock_files(_path: &std::path::Path) -> bool {
+pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
     true
 }
 
@@ -165,7 +165,7 @@ flutter:
 
         std::fs::write(&path, INPUT)?;
 
-        let modified = super::set_version(&path, version)?;
+        let modified = super::set_pubspec_version(&path, version)?;
 
         assert!(modified);
 
@@ -193,7 +193,7 @@ flutter:
         let path = dir.path().join("pubspec.yaml");
 
         std::fs::write(&path, &input)?;
-        let modified = super::set_version(&path, version)?;
+        let modified = super::set_pubspec_version(&path, version)?;
 
         assert!(modified);
 

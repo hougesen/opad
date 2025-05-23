@@ -9,9 +9,9 @@ Easily manage package version across multiple package manager systems in mono re
 | `Rust`                     | `cargo`         | `Cargo.toml`     | `cargo check` (`Cargo.lock`)                              |
 | `JavaScript`, `TypeScript` | `npm`           | `package.json`   | `npm install` (`package-lock.json`)                       |
 | `JavaScript`, `TypeScript` | `pnpm`          | `package.json`   | `pnpm install` (`pnpm-lock.yam`)                          |
-| `JavaScript`, `TypeScript` | `yarn`          | `package.json`   | `yarn install` (`yarn.lock`)                              |
-| `JavaScript`, `TypeScript` | `bun`           | `package.json`   | `bun install` (`bun.lockb`)                               |
-| `JavaScript`, `TypeScript` | `deno`          | `deno.json`      | `deno install` (`deno.lock`)                              |
+| `JavaScript`, `TypeScript` | `bun`           | `package.json`   | `bun install` (`bun.lock`, `bun.lockb`)                   |
+| `JavaScript`, `TypeScript` | `yarn`          | `package.json`   | n/a (`yarn.lock` does not include version)                |
+| `JavaScript`, `TypeScript` | `deno`          | `deno.json`      | `deno install` (`deno.lock`,)                             |
 | `Python`                   | `uv`            | `pyproject.toml` | `uv lock` (`uv.lock`)                                     |
 | `Python`                   | `rye`           | `pyproject.toml` | `rye lock` (`requirements.lock`, `requirements-dev.lock`) |
 | `Python`                   | `poetry`        | `pyproject.toml` | n/a (`poetry.lock` does not include version)              |

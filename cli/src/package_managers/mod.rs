@@ -6,6 +6,18 @@ mod npm;
 mod pubspec;
 mod pyproject;
 
+#[inline]
+fn run_update_lock_file_command(
+    mut command: std::process::Command,
+    dir: &std::path::Path,
+) -> std::io::Result<bool> {
+    command
+        .current_dir(dir)
+        .spawn()?
+        .wait()
+        .map(|exit_code| exit_code.success())
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PackageManager {
     CargoToml,
@@ -87,9 +99,9 @@ impl PackageManagerFile {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
             PackageManager::CrystalShards => crystal::set_shard_yml_version(&self.path, version),
-            PackageManager::DartPubspec => pubspec::set_version(&self.path, version),
+            PackageManager::DartPubspec => pubspec::set_pubspec_version(&self.path, version),
             PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
-            PackageManager::GleamToml => gleam::set_version(&self.path, version),
+            PackageManager::GleamToml => gleam::set_gleam_toml_version(&self.path, version),
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
             PackageManager::PyProject => pyproject::set_version(&self.path, version),
         }

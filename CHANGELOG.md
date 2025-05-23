@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- feat: support crystal shards pm [`#29`](https://github.com/hougesen/crosspmv/pull/29)
 - feat: add support for dart pubspec [`#28`](https://github.com/hougesen/crosspmv/pull/28)
 - refactor: standardize serializing and deserializing [`#27`](https://github.com/hougesen/crosspmv/pull/27)
 - docs: support package managers table [`#26`](https://github.com/hougesen/crosspmv/pull/26)

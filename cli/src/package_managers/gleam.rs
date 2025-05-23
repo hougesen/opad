@@ -1,7 +1,7 @@
 use crate::parsers::toml;
 
 #[inline]
-pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
+pub fn set_gleam_toml_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
 
     let mut document = toml::parse(&contents)?;
@@ -30,7 +30,7 @@ pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool
 }
 
 #[inline]
-pub const fn update_lock_files(_path: &std::path::Path) -> bool {
+pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
     // NOTE: manifest.toml does not include the package version?
 
     true
@@ -38,7 +38,7 @@ pub const fn update_lock_files(_path: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_version {
-    use super::set_version;
+    use super::set_gleam_toml_version;
 
     #[test]
     fn it_should_modify_version() -> anyhow::Result<()> {
@@ -78,7 +78,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
         std::fs::write(&path, input)?;
 
         {
-            let modified = set_version(&path, version)?;
+            let modified = set_gleam_toml_version(&path, version)?;
 
             assert!(modified);
 
@@ -89,7 +89,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
 
         // Validate we do not modify file if version is the same
         {
-            let modified = set_version(&path, version)?;
+            let modified = set_gleam_toml_version(&path, version)?;
 
             assert!(!modified);
 
