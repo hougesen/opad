@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### Unreleased
 
+- docs: support package managers table [`#26`](https://github.com/hougesen/crosspmv/pull/26)
+- feat: ask if retry on lock file error [`#25`](https://github.com/hougesen/crosspmv/pull/25)
 - feat: update version of gleam.toml [`#23`](https://github.com/hougesen/crosspmv/pull/23)
 - feat: update uv and rye lock files [`#14`](https://github.com/hougesen/crosspmv/pull/14)
 - test: setup code coverage [`#13`](https://github.com/hougesen/crosspmv/pull/13)

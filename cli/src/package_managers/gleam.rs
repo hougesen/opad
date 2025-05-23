@@ -1,8 +1,10 @@
+use crate::parsers::toml;
+
 #[inline]
 pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
 
-    let mut document = contents.parse::<toml_edit::DocumentMut>()?;
+    let mut document = toml::parse(&contents)?;
 
     let mut modified = false;
 
@@ -14,24 +16,24 @@ pub fn set_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool
         document.insert(
             "version",
             toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
-                version.to_string(),
+                version.into(),
             ))),
         );
         modified = true;
     }
 
     if modified {
-        std::fs::write(path, document.to_string())?;
+        toml::save(path, &document)?;
     }
 
     Ok(modified)
 }
 
 #[inline]
-pub const fn update_lock_files(_path: &std::path::Path) -> anyhow::Result<bool> {
+pub const fn update_lock_files(_path: &std::path::Path) -> bool {
     // NOTE: manifest.toml does not include the package version?
 
-    Ok(true)
+    true
 }
 
 #[cfg(test)]

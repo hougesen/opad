@@ -1,19 +1,21 @@
+use crate::parsers::json;
+
 #[inline]
 pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow::Result<bool> {
     let contents = std::fs::read_to_string(path)?;
 
-    let mut parsed = serde_json::from_str::<serde_json::Value>(&contents)?;
+    let mut document = json::parse(&contents)?;
 
     let mut modified = false;
 
-    if let Some(root) = parsed.as_object_mut() {
+    if let Some(root) = document.as_object_mut() {
         if root
             .get("version")
             .is_some_and(|outer| outer.as_str().is_some_and(|inner| inner != version))
         {
             root.insert(
-                "version".to_string(),
-                serde_json::Value::String(version.to_string()),
+                "version".to_owned(),
+                serde_json::Value::String(version.into()),
             );
 
             modified = true;
@@ -21,18 +23,15 @@ pub fn set_package_json_version(path: &std::path::Path, version: &str) -> anyhow
     }
 
     if modified {
-        std::fs::write(
-            path,
-            format!("{}\n", serde_json::to_string_pretty(&parsed)?.trim()),
-        )?;
+        json::save(path, &document)?;
     }
 
     Ok(modified)
 }
 
 #[inline]
-pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
-    let exit_code = if path.join("pnpm-lock.yaml").exists() {
+pub fn update_lock_files(path: &std::path::Path) -> std::io::Result<bool> {
+    let mut command = if path.join("pnpm-lock.yaml").exists() {
         let mut cmd = std::process::Command::new("pnpm");
         cmd.arg("install");
         cmd
@@ -48,12 +47,13 @@ pub fn update_lock_files(path: &std::path::Path) -> anyhow::Result<bool> {
         let mut cmd = std::process::Command::new("npm");
         cmd.arg("install");
         cmd
-    }
-    .current_dir(path)
-    .spawn()?
-    .wait()?;
+    };
 
-    Ok(exit_code.success())
+    command
+        .current_dir(path)
+        .spawn()?
+        .wait()
+        .map(|exit_code| exit_code.success())
 }
 
 #[cfg(test)]
