@@ -1,4 +1,5 @@
 mod cargo;
+mod crystal;
 mod deno;
 mod gleam;
 mod npm;
@@ -8,11 +9,12 @@ mod pyproject;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PackageManager {
     CargoToml,
+    CrystalShards,
+    DartPubspec,
     DenoJson,
     GleamToml,
     PackageJson,
     PyProject,
-    Pubspec,
 }
 
 impl PackageManager {
@@ -22,11 +24,12 @@ impl PackageManager {
             .and_then(|inner| inner.to_str())
             .and_then(|file_name| match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
-                "deno.json" => Some(Self::DenoJson),
+                "deno.json" | "deno.json5" | "deno.jsonc" => Some(Self::DenoJson),
                 "gleam.toml" => Some(Self::GleamToml),
-                "package.json" => Some(Self::PackageJson),
+                "package.json" | "package.json5" | "package.jsonc" => Some(Self::PackageJson),
+                "pubspec.yaml" | "pubspec.yml" => Some(Self::DartPubspec),
                 "pyproject.toml" => Some(Self::PyProject),
-                "pubspec.yaml" => Some(Self::Pubspec),
+                "shard.yaml" | "shard.yml" => Some(Self::CrystalShards),
 
                 _ => None,
             })
@@ -83,11 +86,12 @@ impl PackageManagerFile {
     pub fn set_package_version(&self, version: &str) -> anyhow::Result<bool> {
         match self.package_manager {
             PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
+            PackageManager::CrystalShards => crystal::set_shard_yml_version(&self.path, version),
+            PackageManager::DartPubspec => pubspec::set_version(&self.path, version),
             PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
             PackageManager::GleamToml => gleam::set_version(&self.path, version),
             PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
             PackageManager::PyProject => pyproject::set_version(&self.path, version),
-            PackageManager::Pubspec => pubspec::set_version(&self.path, version),
         }
     }
 
@@ -99,11 +103,12 @@ impl PackageManagerFile {
 
         let success = match self.package_manager {
             PackageManager::CargoToml => cargo::update_lock_files(dir)?,
+            PackageManager::CrystalShards => crystal::update_lock_files(dir),
+            PackageManager::DartPubspec => pubspec::update_lock_files(dir),
             PackageManager::DenoJson => deno::update_lock_files(dir)?,
             PackageManager::GleamToml => gleam::update_lock_files(dir),
             PackageManager::PackageJson => npm::update_lock_files(dir)?,
             PackageManager::PyProject => pyproject::update_lock_files(dir)?,
-            PackageManager::Pubspec => pubspec::update_lock_files(dir),
         };
 
         Ok(success)
