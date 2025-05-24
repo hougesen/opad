@@ -112,9 +112,17 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 
 #[cfg(test)]
 mod test_set_package_json_version {
+    use super::{PackageJsonError, set_package_json_version};
+    use crate::package_managers::error::PackageManagerError;
+
     #[test]
-    fn it_should_modify_version() -> Result<(), super::PackageJsonError> {
-        let version = "1.2.3";
+    fn it_should_modify_version() {
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let input = "{
   \"name\": \"npm\",
@@ -133,7 +141,8 @@ mod test_set_package_json_version {
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_package_json_version(input.to_string(), version)?;
+        let (modified, output) =
+            set_package_json_version(input.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
@@ -141,13 +150,47 @@ mod test_set_package_json_version {
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = super::set_package_json_version(output, version)?;
+            let (modified, output) =
+                set_package_json_version(output, &version).expect("it not to raise");
 
             assert!(!modified);
 
             assert_eq!(output, expected_output);
         }
+    }
 
-        Ok(())
+    #[test]
+    fn it_should_require_version_field() {
+        let input = "{ \"name\": \"Mads\" }";
+
+        let result = set_package_json_version(input.to_string(), "5.1.23")
+            .expect_err("it to return an error");
+
+        assert!(matches!(result, PackageJsonError::MissingVersionField));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
+    }
+
+    #[test]
+    fn version_field_should_be_a_string() {
+        let input = "{ \"version\": {} }";
+
+        let result = set_package_json_version(input.to_string(), "5.1.23")
+            .expect_err("it to return an error");
+
+        assert!(matches!(
+            result,
+            PackageJsonError::InvalidVersionFieldDataType
+        ));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 }

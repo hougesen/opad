@@ -61,6 +61,9 @@ pub const fn update_lock_files(_path: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_shard_yml_version {
+    use super::{ShardYmlError, set_shard_yml_version};
+    use crate::package_managers::error::PackageManagerError;
+
     const INPUT: &str = r#"name: crystal-demo
 version:          0.1.0
 
@@ -73,8 +76,13 @@ license:     MIT
 "#;
 
     #[test]
-    fn it_should_update_version() -> Result<(), super::ShardYmlError> {
-        let version = "2025.05.23+1722";
+    fn it_should_update_version() {
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version:          {version}");
 
@@ -82,20 +90,34 @@ license:     MIT
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_shard_yml_version(INPUT.to_string(), version)?;
+        let (modified, output) =
+            set_shard_yml_version(INPUT.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
 
-        Ok(())
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_shard_yml_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
     }
 
     #[test]
-    fn it_support_multiline_strings() -> Result<(), super::ShardYmlError> {
+    fn it_support_multiline_strings() {
         let input = INPUT.replace("version:          0.1.0", "version:\n          0.1.0");
 
-        let version = "2025.05.23+1722";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version:\n          {version}");
 
@@ -103,12 +125,52 @@ license:     MIT
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_shard_yml_version(input, version)?;
+        let (modified, output) = set_shard_yml_version(input, &version).expect("it not to throw");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
 
-        Ok(())
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_shard_yml_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
+    }
+
+    #[test]
+    fn it_should_require_version_field() {
+        let input = "hello: world";
+
+        let result =
+            set_shard_yml_version(input.to_string(), "5.1.23").expect_err("it to return an error");
+
+        assert!(matches!(result, ShardYmlError::MissingVersionField));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
+    }
+
+    #[test]
+    fn version_field_should_be_a_string() {
+        let input = "version:\n    - value\n";
+
+        let result =
+            set_shard_yml_version(input.to_string(), "5.1.23").expect_err("it to return an error");
+
+        assert!(matches!(result, ShardYmlError::InvalidVersionFieldDataType));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 }

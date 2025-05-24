@@ -3,7 +3,7 @@ members = ["cli"]
 resolver = "3"
 
 [workspace.package]
-version = "0.0.0"
+version = "0.0.1-dev"
 edition = "2024"
 homepage = "https://github.com/hougesen/opad?tab=readme-ov-file"
 authors = ["Mads Hougesen <mads@mhouge.dk>"]
@@ -19,6 +19,7 @@ crossterm = "0.29.0"
 ignore = "0.4.23"
 inquire = "0.7.5"
 marked-yaml = "0.7.2"
+rand = "0.9.1"
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 tempfile = "3.20.0"
 toml_edit = "0.22.26"

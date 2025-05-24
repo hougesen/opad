@@ -64,6 +64,9 @@ pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_pubspec_version {
+    use super::{PubspecYamlError, set_pubspec_version};
+    use crate::package_managers::error::PackageManagerError;
+
     const INPUT: &str = r#"name: someapplication
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
@@ -179,8 +182,13 @@ flutter:
 "#;
 
     #[test]
-    fn it_should_update_version() -> Result<(), super::PubspecYamlError> {
-        let version = "2025.05.23+1722";
+    fn it_should_update_version() {
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version: {version}");
 
@@ -188,20 +196,34 @@ flutter:
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_pubspec_version(INPUT.to_string(), version)?;
+        let (modified, output) =
+            set_pubspec_version(INPUT.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
 
-        Ok(())
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_pubspec_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
     }
 
     #[test]
-    fn it_support_multiline_strings() -> Result<(), super::PubspecYamlError> {
+    fn it_support_multiline_strings() {
         let input = INPUT.replace("version: 1.0.7+21", "version:\n   1.0.7+21");
 
-        let version = "2025.05.23+1722";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version:\n   {version}");
 
@@ -209,12 +231,55 @@ flutter:
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_pubspec_version(input, version)?;
+        let (modified, output) = set_pubspec_version(input, &version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
 
-        Ok(())
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_pubspec_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
+    }
+
+    #[test]
+    fn it_should_require_version_field() {
+        let input = "name: Mads\n";
+
+        let result = set_pubspec_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(result, PubspecYamlError::MissingVersionField));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
+    }
+
+    #[test]
+    fn version_field_should_be_string() {
+        let input = "version:\n  - value1\n";
+
+        let result = set_pubspec_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            PubspecYamlError::InvalidVersionFieldDataType
+        ));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 }
