@@ -1,15 +1,17 @@
 use crate::package_managers::{
-    CargoTomlError, PackageJsonError, PubspecYamlError, PyprojectTomlError, ShardYmlError,
+    CargoTomlError, GleamTomlError, PackageJsonError, PubspecYamlError, PyprojectTomlError,
+    ShardYmlError,
 };
 
 #[derive(Debug)]
 pub enum Error {
     CargoToml(CargoTomlError),
+    GleamToml(GleamTomlError),
     Inquire(inquire::InquireError),
     Io(std::io::Error),
     MarkedYaml(Box<marked_yaml::LoadError>),
-    PubspecYaml(PubspecYamlError),
     PackageJson(PackageJsonError),
+    PubspecYaml(PubspecYamlError),
     PyprojectToml(PyprojectTomlError),
     SerdeJson(Box<serde_json::Error>),
     ShardYml(ShardYmlError),
@@ -23,15 +25,16 @@ impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::CargoToml(error) => error.fmt(f),
+            Self::GleamToml(error) => error.fmt(f),
             Self::Inquire(error) => error.fmt(f),
             Self::Io(error) => error.fmt(f),
             Self::MarkedYaml(error) => error.fmt(f),
+            Self::PackageJson(error) => error.fmt(f),
             Self::PubspecYaml(error) => error.fmt(f),
             Self::PyprojectToml(error) => error.fmt(f),
             Self::SerdeJson(error) => error.fmt(f),
             Self::ShardYml(error) => error.fmt(f),
             Self::TomlEdit(error) => error.fmt(f),
-            Self::PackageJson(error) => error.fmt(f),
         }
     }
 }
@@ -103,5 +106,12 @@ impl From<PackageJsonError> for Error {
     #[inline]
     fn from(value: PackageJsonError) -> Self {
         Self::PackageJson(value)
+    }
+}
+
+impl From<GleamTomlError> for Error {
+    #[inline]
+    fn from(value: GleamTomlError) -> Self {
+        Self::GleamToml(value)
     }
 }

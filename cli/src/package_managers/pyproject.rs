@@ -3,9 +3,9 @@ use crate::parsers::toml;
 
 #[derive(Debug)]
 pub enum PyprojectTomlError {
-    MissingProjectField,
     InvalidProjectFieldDataType,
     InvalidVersionFieldDataType,
+    MissingProjectField,
     MissingVersionField,
 }
 
@@ -15,12 +15,12 @@ impl core::fmt::Display for PyprojectTomlError {
     #[inline]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::MissingProjectField => write!(f, "\"project\" field not found"),
             Self::InvalidProjectFieldDataType => write!(f, "\"project\" field is not a table"),
-            Self::MissingVersionField => write!(f, "\"project.version\" field not found"),
             Self::InvalidVersionFieldDataType => {
                 write!(f, "\"project.version\" field is not a string")
             }
+            Self::MissingProjectField => write!(f, "\"project\" field not found"),
+            Self::MissingVersionField => write!(f, "\"project.version\" field not found"),
         }
     }
 }

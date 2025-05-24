@@ -30,5 +30,6 @@ All notable changes to this project will be documented in this file. Dates are d
 - feat: custom error messages for shard.yml [`4771c0a`](https://github.com/hougesen/crosspmv/commit/4771c0a7f2d377f4d1174566c38e9f1ccc60abb7)
 - feat: custom pyproject errors [`149ad2c`](https://github.com/hougesen/crosspmv/commit/149ad2c5fe964f19d977f7017d7b87162482a8eb)
 - refactor: run update lock file between version updates [`2a1c53f`](https://github.com/hougesen/crosspmv/commit/2a1c53f408390cb6684352279eadf99ca117f38e)
+- feat: package.json errors [`e7c14ba`](https://github.com/hougesen/crosspmv/commit/e7c14bab39a83b3291f8baacfe6f528162ae9201)
 - feat: custom error messages for pubspec.yaml [`17d2f5c`](https://github.com/hougesen/crosspmv/commit/17d2f5c707dd19403f84b4cc1bc65949399b62e0)
 - chore: add MIT license [`2e13548`](https://github.com/hougesen/crosspmv/commit/2e135488b26dc50e6d90d362a06c3978933189d3)

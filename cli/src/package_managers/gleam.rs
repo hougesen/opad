@@ -1,5 +1,23 @@
 use crate::parsers::toml;
 
+#[derive(Debug)]
+pub enum GleamTomlError {
+    InvalidVersionFieldDataType,
+    MissingVersionField,
+}
+
+impl core::error::Error for GleamTomlError {}
+
+impl core::fmt::Display for GleamTomlError {
+    #[inline]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
+            Self::MissingVersionField => write!(f, "\"version\" field not found"),
+        }
+    }
+}
+
 #[inline]
 pub fn set_gleam_toml_version(
     path: &std::path::Path,
@@ -9,23 +27,24 @@ pub fn set_gleam_toml_version(
 
     let mut document = toml::parse(&contents)?;
 
-    let mut modified = false;
-
-    let should_modify = document
+    let version_key = document
         .get("version")
-        .is_some_and(|outer| outer.as_str().is_some_and(|inner| inner != version));
+        .ok_or(GleamTomlError::MissingVersionField)?;
 
-    if should_modify {
+    let version_key_str = version_key
+        .as_str()
+        .ok_or(GleamTomlError::InvalidVersionFieldDataType)?;
+
+    let modified = version_key_str != version;
+
+    if modified {
         document.insert(
             "version",
             toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
                 version.into(),
             ))),
         );
-        modified = true;
-    }
 
-    if modified {
         toml::save(path, &document)?;
     }
 

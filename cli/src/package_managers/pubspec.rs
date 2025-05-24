@@ -2,7 +2,7 @@ use crate::parsers::yaml;
 
 #[derive(Debug)]
 pub enum PubspecYamlError {
-    InvalidDocument,
+    DocumentNotAMap,
     InvalidVersionFieldDataType,
     MissingVersionField,
 }
@@ -13,7 +13,7 @@ impl core::fmt::Display for PubspecYamlError {
     #[inline]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::InvalidDocument => write!(f, "Document is not to parseable"),
+            Self::DocumentNotAMap => write!(f, "Input document is not a map"),
             Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
             Self::MissingVersionField => write!(f, "\"version\" field not found"),
         }
@@ -31,7 +31,7 @@ pub fn set_pubspec_version(
 
     let map = document
         .as_mapping()
-        .ok_or(PubspecYamlError::InvalidDocument)?;
+        .ok_or(PubspecYamlError::DocumentNotAMap)?;
 
     let version_node = map
         .get_node("version")
