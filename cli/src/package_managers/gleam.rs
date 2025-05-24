@@ -63,6 +63,7 @@ pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_gleam_toml_version {
+    use super::{GleamTomlError, set_gleam_toml_version};
     use crate::package_managers::error::PackageManagerError;
 
     #[test]
@@ -97,7 +98,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            super::set_gleam_toml_version(input.to_string(), version).expect("it not to raise");
+            set_gleam_toml_version(input.to_string(), version).expect("it not to raise");
 
         assert!(modified);
 
@@ -106,7 +107,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
         // Validate we do not modify file if version is the same
         {
             let (modified, output) =
-                super::set_gleam_toml_version(output, version).expect("it not to raise");
+                set_gleam_toml_version(output, version).expect("it not to raise");
 
             assert!(!modified);
 
@@ -118,30 +119,34 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
     fn it_should_require_version_field() {
         let input = "";
 
-        let result = super::set_gleam_toml_version(input.to_string(), "1.23.4")
+        let result = set_gleam_toml_version(input.to_string(), "1.23.4")
             .expect_err("it should return an error");
 
-        assert!(matches!(result, super::GleamTomlError::MissingVersionField));
+        assert!(matches!(result, GleamTomlError::MissingVersionField));
 
-        assert!(result.to_string().contains("\"version\""));
-
-        PackageManagerError::from(result).test_up_casting();
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 
     #[test]
     fn version_field_should_be_string() {
         let input = "[version]\nkey = \"value\"\n";
 
-        let result = super::set_gleam_toml_version(input.to_string(), "1.23.4")
+        let result = set_gleam_toml_version(input.to_string(), "1.23.4")
             .expect_err("it should return an error");
 
         assert!(matches!(
             result,
-            super::GleamTomlError::InvalidVersionFieldDataType
+            GleamTomlError::InvalidVersionFieldDataType
         ));
 
-        assert!(result.to_string().contains("\"version\""));
-
-        PackageManagerError::from(result).test_up_casting();
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 }

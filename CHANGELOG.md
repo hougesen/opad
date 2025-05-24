@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. Dates are d
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.0.0...HEAD)
 
 - refactor: remove side effects from set version fns [`#39`](https://github.com/hougesen/opad/pull/39)
+- test: gleam error cases [`d21f17d`](https://github.com/hougesen/opad/commit/d21f17d9a0e7bd1de83058f8b96f222700c7af95)
+- test: pubspec error cases [`417ae6d`](https://github.com/hougesen/opad/commit/417ae6db8e1236a14c01b1fcf845dc9d5aa44fa4)
+- test: validate cargo requires version field [`88d5ef4`](https://github.com/hougesen/opad/commit/88d5ef449a44937ddfa97ec4862f9ecb56b04b74)
+- fix: disable PackageManagerError::test_up_casting during dev [`3d42b0c`](https://github.com/hougesen/opad/commit/3d42b0c6ff2d80715aa2f6f81d0c20384efae1a9)
+- test: crystal requires version field [`a42fe73`](https://github.com/hougesen/opad/commit/a42fe73e82a84a9de0e358f29a2dce5190e9b9c8)
 
 #### v0.0.0
 

@@ -4,9 +4,9 @@ use crate::parsers::toml;
 #[derive(Debug)]
 pub enum PyprojectTomlError {
     InvalidProjectFieldDataType,
-    InvalidVersionFieldDataType,
+    InvalidProjectVersionFieldDataType,
     MissingProjectField,
-    MissingVersionField,
+    MissingProjectVersionField,
     ParseToml(Box<toml_edit::TomlError>),
 }
 
@@ -17,11 +17,11 @@ impl core::fmt::Display for PyprojectTomlError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::InvalidProjectFieldDataType => write!(f, "\"project\" field is not a table"),
-            Self::InvalidVersionFieldDataType => {
+            Self::InvalidProjectVersionFieldDataType => {
                 write!(f, "\"project.version\" field is not a string")
             }
             Self::MissingProjectField => write!(f, "\"project\" field not found"),
-            Self::MissingVersionField => write!(f, "\"project.version\" field not found"),
+            Self::MissingProjectVersionField => write!(f, "\"project.version\" field not found"),
             Self::ParseToml(error) => error.fmt(f),
         }
     }
@@ -45,11 +45,11 @@ pub fn set_pyproject_version(
 
     let version_key = package_table
         .get("version")
-        .ok_or(PyprojectTomlError::MissingVersionField)?;
+        .ok_or(PyprojectTomlError::MissingProjectVersionField)?;
 
     let version_key_str = version_key
         .as_str()
-        .ok_or(PyprojectTomlError::InvalidVersionFieldDataType)?;
+        .ok_or(PyprojectTomlError::InvalidProjectVersionFieldDataType)?;
 
     let modified = version_key_str != version;
 
@@ -115,8 +115,11 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 
 #[cfg(test)]
 mod test_set_pyproject_version {
+    use super::set_pyproject_version;
+    use crate::package_managers::{error::PackageManagerError, pyproject::PyprojectTomlError};
+
     #[test]
-    fn it_should_modify_version() -> Result<(), super::PyprojectTomlError> {
+    fn it_should_modify_version() {
         let version = "1.2.3";
 
         let input = "[project]
@@ -135,7 +138,8 @@ dependencies = []
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_pyproject_version(input.to_string(), version)?;
+        let (modified, output) =
+            set_pyproject_version(input.to_string(), version).expect("it to not raise");
 
         assert!(modified);
 
@@ -143,13 +147,85 @@ dependencies = []
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = super::set_pyproject_version(output, version)?;
+            let (modified, output) =
+                set_pyproject_version(output, version).expect("it not to raise");
 
             assert!(!modified);
 
             assert_eq!(output, expected_output);
         }
+    }
 
-        Ok(())
+    #[test]
+    fn it_should_require_project_field() {
+        let input = "\n";
+
+        let result = set_pyproject_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(result, PyprojectTomlError::MissingProjectField));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"project\"")
+        );
+    }
+
+    #[test]
+    fn project_field_should_be_a_table() {
+        let input = "project = \"value\"\n";
+
+        let result = set_pyproject_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            PyprojectTomlError::InvalidProjectFieldDataType
+        ));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"project\"")
+        );
+    }
+
+    #[test]
+    fn it_should_require_project_version_field() {
+        let input = "[project]\nkey = \"value\"\n";
+
+        let result = set_pyproject_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            PyprojectTomlError::MissingProjectVersionField
+        ));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"project.version\"")
+        );
+    }
+
+    #[test]
+    fn project_version_field_should_be_string() {
+        let input = "[project.version]\nkey = \"value\"\n";
+
+        let result = set_pyproject_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            PyprojectTomlError::InvalidProjectVersionFieldDataType
+        ));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"project.version\"")
+        );
     }
 }

@@ -64,10 +64,8 @@ pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_pubspec_version {
-    use crate::package_managers::{
-        error::PackageManagerError,
-        pubspec::{PubspecYamlError, set_pubspec_version},
-    };
+    use super::{PubspecYamlError, set_pubspec_version};
+    use crate::package_managers::error::PackageManagerError;
 
     const INPUT: &str = r#"name: someapplication
 description: A new Flutter project.
@@ -184,7 +182,7 @@ flutter:
 "#;
 
     #[test]
-    fn it_should_update_version() -> Result<(), super::PubspecYamlError> {
+    fn it_should_update_version() {
         let version = "2025.05.23+1722";
 
         let new_version_line = format!("version: {version}");
@@ -193,17 +191,16 @@ flutter:
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_pubspec_version(INPUT.to_string(), version)?;
+        let (modified, output) =
+            set_pubspec_version(INPUT.to_string(), version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
-
-        Ok(())
     }
 
     #[test]
-    fn it_support_multiline_strings() -> Result<(), super::PubspecYamlError> {
+    fn it_support_multiline_strings() {
         let input = INPUT.replace("version: 1.0.7+21", "version:\n   1.0.7+21");
 
         let version = "2025.05.23+1722";
@@ -214,13 +211,11 @@ flutter:
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_pubspec_version(input, version)?;
+        let (modified, output) = set_pubspec_version(input, version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
-
-        Ok(())
     }
 
     #[test]
@@ -232,9 +227,11 @@ flutter:
 
         assert!(matches!(result, PubspecYamlError::MissingVersionField));
 
-        assert!(result.to_string().contains("\"version\""));
-
-        PackageManagerError::from(result).test_up_casting();
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 
     #[test]
@@ -249,8 +246,10 @@ flutter:
             PubspecYamlError::InvalidVersionFieldDataType
         ));
 
-        assert!(result.to_string().contains("\"version\""));
-
-        PackageManagerError::from(result).test_up_casting();
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 }

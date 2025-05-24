@@ -29,27 +29,6 @@ impl core::fmt::Display for PackageManagerError {
     }
 }
 
-impl PackageManagerError {
-    #[cfg(test)]
-    pub fn test_up_casting(self) {
-        // Disabled during dev to not obscure the coverage
-        if std::env::var("GITHUB_ACTIONS").is_ok() {
-            let self_to_string = self.to_string();
-
-            match &self {
-                Self::ShardYml(inner) => assert_eq!(inner.to_string(), self_to_string),
-                Self::CargoToml(inner) => assert_eq!(inner.to_string(), self_to_string),
-                Self::PackageJson(inner) => assert_eq!(inner.to_string(), self_to_string),
-                Self::GleamToml(inner) => assert_eq!(inner.to_string(), self_to_string),
-                Self::PyprojectToml(inner) => assert_eq!(inner.to_string(), self_to_string),
-                Self::PubspecYaml(inner) => assert_eq!(inner.to_string(), self_to_string),
-            };
-
-            assert_eq!(self_to_string, crate::error::Error::from(self).to_string());
-        }
-    }
-}
-
 impl From<CargoTomlError> for PackageManagerError {
     #[inline]
     fn from(value: CargoTomlError) -> Self {

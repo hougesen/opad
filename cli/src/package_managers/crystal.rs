@@ -61,6 +61,7 @@ pub const fn update_lock_files(_path: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_shard_yml_version {
+    use super::{ShardYmlError, set_shard_yml_version};
     use crate::package_managers::error::PackageManagerError;
 
     const INPUT: &str = r#"name: crystal-demo
@@ -85,7 +86,7 @@ license:     MIT
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            super::set_shard_yml_version(INPUT.to_string(), version).expect("it not to raise");
+            set_shard_yml_version(INPUT.to_string(), version).expect("it not to raise");
 
         assert!(modified);
 
@@ -104,8 +105,7 @@ license:     MIT
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) =
-            super::set_shard_yml_version(input, version).expect("it not to throw");
+        let (modified, output) = set_shard_yml_version(input, version).expect("it not to throw");
 
         assert!(modified);
 
@@ -116,13 +116,31 @@ license:     MIT
     fn it_should_require_version_field() {
         let input = "hello: world";
 
-        let result = super::set_shard_yml_version(input.to_string(), "5.1.23")
-            .expect_err("it to return an error");
+        let result =
+            set_shard_yml_version(input.to_string(), "5.1.23").expect_err("it to return an error");
 
-        assert!(matches!(result, super::ShardYmlError::MissingVersionField));
+        assert!(matches!(result, ShardYmlError::MissingVersionField));
 
-        assert!(result.to_string().contains("\"version\""));
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
+    }
 
-        PackageManagerError::from(result).test_up_casting();
+    #[test]
+    fn version_field_should_be_a_string() {
+        let input = "version:\n    - value\n";
+
+        let result =
+            set_shard_yml_version(input.to_string(), "5.1.23").expect_err("it to return an error");
+
+        assert!(matches!(result, ShardYmlError::InvalidVersionFieldDataType));
+
+        assert!(
+            crate::error::Error::from(PackageManagerError::from(result))
+                .to_string()
+                .contains("\"version\"")
+        );
     }
 }
