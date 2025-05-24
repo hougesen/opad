@@ -1,7 +1,7 @@
 use super::run_update_lock_file_command;
 use crate::parsers::toml;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum CargoTomlError {
     InvalidPackageFieldDataType { workspace: bool },
     InvalidVersionFieldDataType { workspace: bool },
@@ -243,5 +243,57 @@ toml_edit = "0.22.26"
         }
 
         Ok(())
+    }
+
+    #[test]
+    fn it_should_require_package_field() {
+        let input = "";
+
+        let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert_eq!(
+            result,
+            super::CargoTomlError::MissingPackageField { workspace: false }
+        );
+    }
+
+    #[test]
+    fn it_should_require_package_version_field() {
+        let input = "[package]";
+
+        let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert_eq!(
+            result,
+            super::CargoTomlError::MissingVersionField { workspace: false }
+        );
+    }
+
+    #[test]
+    fn workspace_should_require_package_field() {
+        let input = "[workspace]";
+
+        let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert_eq!(
+            result,
+            super::CargoTomlError::MissingPackageField { workspace: true }
+        );
+    }
+
+    #[test]
+    fn workspace_should_require_package_version_field() {
+        let input = "[workspace.package]";
+
+        let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert_eq!(
+            result,
+            super::CargoTomlError::MissingVersionField { workspace: true }
+        );
     }
 }
