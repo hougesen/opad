@@ -1,6 +1,7 @@
 pub use cargo::CargoTomlError;
 pub use crystal::ShardYmlError;
 pub use pubspec::PubspecYamlError;
+pub use pyproject::PyprojectTomlError;
 
 mod cargo;
 mod crystal;

@@ -29,4 +29,5 @@ All notable changes to this project will be documented in this file. Dates are d
 - feat: information errors for Cargo.toml [`032a78d`](https://github.com/hougesen/crosspmv/commit/032a78dca814967c7f98cd6b7ef7114505118b0c)
 - feat: custom error messages for shard.yml [`4771c0a`](https://github.com/hougesen/crosspmv/commit/4771c0a7f2d377f4d1174566c38e9f1ccc60abb7)
 - refactor: run update lock file between version updates [`2a1c53f`](https://github.com/hougesen/crosspmv/commit/2a1c53f408390cb6684352279eadf99ca117f38e)
+- feat: custom error messages for pubspec.yaml [`17d2f5c`](https://github.com/hougesen/crosspmv/commit/17d2f5c707dd19403f84b4cc1bc65949399b62e0)
 - chore: add MIT license [`2e13548`](https://github.com/hougesen/crosspmv/commit/2e135488b26dc50e6d90d362a06c3978933189d3)

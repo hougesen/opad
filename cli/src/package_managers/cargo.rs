@@ -73,12 +73,14 @@ fn set_package_version(
 
     let modified = version_key_str != version;
 
-    package_table.insert(
-        "version",
-        toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
-            version.into(),
-        ))),
-    );
+    if modified {
+        package_table.insert(
+            "version",
+            toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
+                version.into(),
+            ))),
+        );
+    }
 
     Ok(modified)
 }
