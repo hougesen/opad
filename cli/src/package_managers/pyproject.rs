@@ -1,6 +1,29 @@
+use super::run_update_lock_file_command;
 use crate::parsers::toml;
 
-use super::run_update_lock_file_command;
+#[derive(Debug)]
+pub enum PyprojectTomlError {
+    InvalidProjectFieldDataType,
+    InvalidVersionFieldDataType,
+    MissingProjectField,
+    MissingVersionField,
+}
+
+impl core::error::Error for PyprojectTomlError {}
+
+impl core::fmt::Display for PyprojectTomlError {
+    #[inline]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::InvalidProjectFieldDataType => write!(f, "\"project\" field is not a table"),
+            Self::InvalidVersionFieldDataType => {
+                write!(f, "\"project.version\" field is not a string")
+            }
+            Self::MissingProjectField => write!(f, "\"project\" field not found"),
+            Self::MissingVersionField => write!(f, "\"project.version\" field not found"),
+        }
+    }
+}
 
 #[inline]
 pub fn set_version(path: &std::path::Path, version: &str) -> Result<bool, crate::error::Error> {
@@ -8,27 +31,32 @@ pub fn set_version(path: &std::path::Path, version: &str) -> Result<bool, crate:
 
     let mut document = toml::parse(&contents)?;
 
-    let mut modified = false;
+    let package_raw = document
+        .get_mut("project")
+        .ok_or(PyprojectTomlError::MissingProjectField)?;
 
-    if let Some(package_raw) = document.get_mut("project") {
-        if let Some(package_table) = package_raw.as_table_like_mut() {
-            let should_modify = package_table
-                .get("version")
-                .is_some_and(|outer| outer.as_str().is_some_and(|inner| inner != version));
+    let package_table = package_raw
+        .as_table_like_mut()
+        .ok_or(PyprojectTomlError::InvalidProjectFieldDataType)?;
 
-            if should_modify {
-                package_table.insert(
-                    "version",
-                    toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
-                        version.into(),
-                    ))),
-                );
-                modified = true;
-            }
-        }
-    }
+    let version_key = package_table
+        .get("version")
+        .ok_or(PyprojectTomlError::MissingVersionField)?;
+
+    let version_key_str = version_key
+        .as_str()
+        .ok_or(PyprojectTomlError::InvalidVersionFieldDataType)?;
+
+    let modified = version_key_str != version;
 
     if modified {
+        package_table.insert(
+            "version",
+            toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
+                version.into(),
+            ))),
+        );
+
         toml::save(path, &document)?;
     }
 

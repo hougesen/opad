@@ -1,3 +1,10 @@
+pub use cargo::CargoTomlError;
+pub use crystal::ShardYmlError;
+pub use gleam::GleamTomlError;
+pub use npm::PackageJsonError;
+pub use pubspec::PubspecYamlError;
+pub use pyproject::PyprojectTomlError;
+
 mod cargo;
 mod crystal;
 mod deno;

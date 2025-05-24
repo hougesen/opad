@@ -1,8 +1,7 @@
-use crossterm::style::Stylize;
-
 use crate::{
     cli::Cli,
     fs::{find_package_manager_files, setup_walker},
+    logging::{log_error, log_info, log_success, log_warn},
 };
 
 #[inline]
@@ -14,7 +13,7 @@ pub fn run_command(args: &Cli) -> Result<(), crate::error::Error> {
     let files = find_package_manager_files(walker, &dir);
 
     if files.is_empty() {
-        println!("{}", "No supported package managers found".yellow().bold());
+        log_warn("No supported package managers found");
 
         return Ok(());
     }
@@ -24,7 +23,7 @@ pub fn run_command(args: &Cli) -> Result<(), crate::error::Error> {
         .prompt()?;
 
     if selected.is_empty() {
-        println!("{}", "No files selected".yellow().bold());
+        log_warn("No files selected");
 
         return Ok(());
     }
@@ -40,41 +39,42 @@ pub fn run_command(args: &Cli) -> Result<(), crate::error::Error> {
         .with_initial_value(&version)
         .prompt()?;
 
-        s.set_package_version(&version)?;
-    }
+        if let Err(error) = s.set_package_version(&version) {
+            log_error(&format!("{error}"));
+        } else {
+            log_success(&format!("{} has been updated", s.path.display()));
 
-    println!("{}", "Files has been updated".bold().green());
-
-    let should_update_lock_files =
-        inquire::Confirm::new("Do you wish to update the lock files? (experimental)")
-            .with_default(true)
-            .prompt_skippable()?;
-
-    if should_update_lock_files.unwrap_or_default() {
-        for f in selected {
-            println!(
-                "{}",
-                format!("Updating lockfiles connected to {}", f.path.display())
-                    .blue()
-                    .bold()
-            );
-
-            loop {
-                if f.update_lock_files()? {
-                    break;
-                }
-
-                eprintln!("{}", "Error updating lockfiles".bold().red());
-
-                let retry = inquire::Confirm::new("Do you wish to retry?")
-                    .with_default(false)
+            let should_update_lock_files =
+                inquire::Confirm::new("Do you wish to update the lock files (experimental)")
+                    .with_default(true)
                     .prompt_skippable()?;
 
-                if !retry.unwrap_or_default() {
-                    break;
+            if should_update_lock_files.unwrap_or_default() {
+                log_info(&format!(
+                    "Updating lock files connected to {}",
+                    s.path.display()
+                ));
+
+                loop {
+                    if s.update_lock_files()? {
+                        log_success("Lock files has been updated");
+                        break;
+                    }
+
+                    log_error("Error updating lock files");
+
+                    let retry = inquire::Confirm::new("Do you wish to retry?")
+                        .with_default(false)
+                        .prompt_skippable()?;
+
+                    if !retry.unwrap_or_default() {
+                        break;
+                    }
                 }
             }
         }
+
+        println!();
     }
 
     Ok(())

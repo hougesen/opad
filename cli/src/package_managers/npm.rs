@@ -1,6 +1,25 @@
+use super::run_update_lock_file_command;
 use crate::parsers::json;
 
-use super::run_update_lock_file_command;
+#[derive(Debug)]
+pub enum PackageJsonError {
+    DocumentNotAnObject,
+    InvalidVersionFieldDataType,
+    MissingVersionField,
+}
+
+impl core::error::Error for PackageJsonError {}
+
+impl core::fmt::Display for PackageJsonError {
+    #[inline]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::DocumentNotAnObject => write!(f, "Document is not an object"),
+            Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
+            Self::MissingVersionField => write!(f, "\"version\" field not found"),
+        }
+    }
+}
 
 #[inline]
 pub fn set_package_json_version(
@@ -11,23 +30,26 @@ pub fn set_package_json_version(
 
     let mut document = json::parse(&contents)?;
 
-    let mut modified = false;
+    let root = document
+        .as_object_mut()
+        .ok_or(PackageJsonError::DocumentNotAnObject)?;
 
-    if let Some(root) = document.as_object_mut() {
-        if root
-            .get("version")
-            .is_some_and(|outer| outer.as_str().is_some_and(|inner| inner != version))
-        {
-            root.insert(
-                "version".to_owned(),
-                serde_json::Value::String(version.into()),
-            );
+    let version_key = root
+        .get("version")
+        .ok_or(PackageJsonError::MissingVersionField)?;
 
-            modified = true;
-        }
-    }
+    let version_key_str = version_key
+        .as_str()
+        .ok_or(PackageJsonError::InvalidVersionFieldDataType)?;
+
+    let modified = version_key_str != version;
 
     if modified {
+        root.insert(
+            "version".to_owned(),
+            serde_json::Value::String(version.into()),
+        );
+
         json::save(path, &document)?;
     }
 
