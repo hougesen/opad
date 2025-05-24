@@ -34,8 +34,11 @@ impl From<inquire::InquireError> for Error {
     }
 }
 
-impl From<PackageManagerError> for Error {
-    fn from(value: PackageManagerError) -> Self {
-        Self::PackageManager(value)
+impl<T> From<T> for crate::error::Error
+where
+    T: Into<PackageManagerError>,
+{
+    fn from(value: T) -> Self {
+        Self::PackageManager(value.into())
     }
 }
