@@ -7,7 +7,7 @@ pub enum PyprojectTomlError {
     InvalidVersionFieldDataType,
     MissingProjectField,
     MissingVersionField,
-    ParseToml(toml_edit::TomlError),
+    ParseToml(Box<toml_edit::TomlError>),
 }
 
 impl core::error::Error for PyprojectTomlError {}
@@ -28,8 +28,12 @@ impl core::fmt::Display for PyprojectTomlError {
 }
 
 #[inline]
-pub fn set_version(contents: String, version: &str) -> Result<(bool, String), PyprojectTomlError> {
-    let mut document = toml::parse(&contents).map_err(PyprojectTomlError::ParseToml)?;
+pub fn set_pyproject_version(
+    contents: String,
+    version: &str,
+) -> Result<(bool, String), PyprojectTomlError> {
+    let mut document =
+        toml::parse(&contents).map_err(|error| PyprojectTomlError::ParseToml(Box::new(error)))?;
 
     let package_raw = document
         .get_mut("project")
@@ -57,7 +61,7 @@ pub fn set_version(contents: String, version: &str) -> Result<(bool, String), Py
             ))),
         );
 
-        toml::save(&document)
+        toml::serialize(&document)
     } else {
         contents
     };
@@ -110,11 +114,9 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 }
 
 #[cfg(test)]
-mod test_set_version {
-    use super::{PyprojectTomlError, set_version};
-
+mod test_set_pyproject_version {
     #[test]
-    fn it_should_modify_version() -> Result<(), PyprojectTomlError> {
+    fn it_should_modify_version() -> Result<(), super::PyprojectTomlError> {
         let version = "1.2.3";
 
         let input = "[project]
@@ -133,7 +135,7 @@ dependencies = []
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = set_version(input.to_string(), version)?;
+        let (modified, output) = super::set_pyproject_version(input.to_string(), version)?;
 
         assert!(modified);
 
@@ -141,7 +143,7 @@ dependencies = []
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = set_version(output, version)?;
+            let (modified, output) = super::set_pyproject_version(output, version)?;
 
             assert!(!modified);
 

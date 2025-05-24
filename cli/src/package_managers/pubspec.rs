@@ -5,7 +5,7 @@ pub enum PubspecYamlError {
     DocumentNotAMap,
     InvalidVersionFieldDataType,
     MissingVersionField,
-    ParseYml(marked_yaml::LoadError),
+    ParseYml(Box<marked_yaml::LoadError>),
 }
 
 impl core::error::Error for PubspecYamlError {}
@@ -27,7 +27,8 @@ pub fn set_pubspec_version(
     mut contents: String,
     version: &str,
 ) -> Result<(bool, String), PubspecYamlError> {
-    let document = yaml::parse(&contents).map_err(PubspecYamlError::ParseYml)?;
+    let document =
+        yaml::parse(&contents).map_err(|error| PubspecYamlError::ParseYml(Box::new(error)))?;
 
     let map = document
         .as_mapping()
@@ -48,7 +49,7 @@ pub fn set_pubspec_version(
     contents = output;
 
     let output = if modified {
-        yaml::save(&contents)
+        yaml::serialize(&contents)
     } else {
         contents
     };
@@ -62,9 +63,7 @@ pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
 }
 
 #[cfg(test)]
-mod test_set_version {
-    use super::PubspecYamlError;
-
+mod test_set_pubspec_version {
     const INPUT: &str = r#"name: someapplication
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
@@ -180,7 +179,7 @@ flutter:
 "#;
 
     #[test]
-    fn it_should_update_version() -> Result<(), PubspecYamlError> {
+    fn it_should_update_version() -> Result<(), super::PubspecYamlError> {
         let version = "2025.05.23+1722";
 
         let new_version_line = format!("version: {version}");
@@ -199,7 +198,7 @@ flutter:
     }
 
     #[test]
-    fn it_support_multiline_strings() -> Result<(), PubspecYamlError> {
+    fn it_support_multiline_strings() -> Result<(), super::PubspecYamlError> {
         let input = INPUT.replace("version: 1.0.7+21", "version:\n   1.0.7+21");
 
         let version = "2025.05.23+1722";
@@ -210,7 +209,7 @@ flutter:
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_pubspec_version(input.to_string(), version)?;
+        let (modified, output) = super::set_pubspec_version(input, version)?;
 
         assert!(modified);
 

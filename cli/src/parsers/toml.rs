@@ -4,7 +4,7 @@ pub fn parse(contents: &str) -> Result<toml_edit::DocumentMut, toml_edit::TomlEr
 }
 
 #[inline]
-pub fn save(document: &toml_edit::DocumentMut) -> String {
+pub fn serialize(document: &toml_edit::DocumentMut) -> String {
     let serialized = document.to_string();
 
     format!("{}\n", serialized.trim())

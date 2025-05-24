@@ -1,4 +1,7 @@
-use super::{PackageJsonError, npm, run_update_lock_file_command};
+use super::{
+    npm::{self, PackageJsonError},
+    run_update_lock_file_command,
+};
 
 /// `deno.json` follows the same format as `package.json` (?)
 #[inline]

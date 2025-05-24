@@ -4,7 +4,7 @@ use crate::parsers::toml;
 pub enum GleamTomlError {
     InvalidVersionFieldDataType,
     MissingVersionField,
-    ParseToml(toml_edit::TomlError),
+    ParseToml(Box<toml_edit::TomlError>),
 }
 
 impl core::error::Error for GleamTomlError {}
@@ -25,7 +25,8 @@ pub fn set_gleam_toml_version(
     contents: String,
     version: &str,
 ) -> Result<(bool, String), GleamTomlError> {
-    let mut document = toml::parse(&contents).map_err(GleamTomlError::ParseToml)?;
+    let mut document =
+        toml::parse(&contents).map_err(|error| GleamTomlError::ParseToml(Box::new(error)))?;
 
     let version_key = document
         .get("version")
@@ -45,7 +46,7 @@ pub fn set_gleam_toml_version(
             ))),
         );
 
-        toml::save(&document)
+        toml::serialize(&document)
     } else {
         contents
     };
@@ -61,11 +62,9 @@ pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
 }
 
 #[cfg(test)]
-mod test_set_version {
-    use super::{GleamTomlError, set_gleam_toml_version};
-
+mod test_set_gleam_toml_version {
     #[test]
-    fn it_should_modify_version() -> Result<(), GleamTomlError> {
+    fn it_should_modify_version() -> Result<(), super::GleamTomlError> {
         let version = "1.2.3";
 
         let input = r#"name = "sgleam_demo"
@@ -95,7 +94,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = set_gleam_toml_version(input.to_string(), version)?;
+        let (modified, output) = super::set_gleam_toml_version(input.to_string(), version)?;
 
         assert!(modified);
 
@@ -103,7 +102,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = set_gleam_toml_version(output.to_string(), version)?;
+            let (modified, output) = super::set_gleam_toml_version(output, version)?;
 
             assert!(!modified);
 

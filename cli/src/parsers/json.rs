@@ -4,7 +4,7 @@ pub fn parse(contents: &str) -> Result<serde_json::Value, serde_json::Error> {
 }
 
 #[inline]
-pub fn save(document: &serde_json::Value) -> Result<String, serde_json::Error> {
+pub fn serialize(document: &serde_json::Value) -> Result<String, serde_json::Error> {
     let serialized = serde_json::to_string_pretty(&document)?;
 
     Ok(format!("{}\n", serialized.trim()))

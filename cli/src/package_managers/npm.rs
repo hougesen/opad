@@ -6,7 +6,8 @@ pub enum PackageJsonError {
     DocumentNotAnObject,
     InvalidVersionFieldDataType,
     MissingVersionField,
-    ParseJson(serde_json::Error),
+    ParseJson(Box<serde_json::Error>),
+    SerializeJson(Box<serde_json::Error>),
 }
 
 impl core::error::Error for PackageJsonError {}
@@ -18,7 +19,7 @@ impl core::fmt::Display for PackageJsonError {
             Self::DocumentNotAnObject => write!(f, "Document is not an object"),
             Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
             Self::MissingVersionField => write!(f, "\"version\" field not found"),
-            Self::ParseJson(error) => error.fmt(f),
+            Self::ParseJson(error) | Self::SerializeJson(error) => error.fmt(f),
         }
     }
 }
@@ -28,7 +29,8 @@ pub fn set_package_json_version(
     contents: String,
     version: &str,
 ) -> Result<(bool, String), PackageJsonError> {
-    let mut document = json::parse(&contents).map_err(PackageJsonError::ParseJson)?;
+    let mut document =
+        json::parse(&contents).map_err(|error| PackageJsonError::ParseJson(Box::new(error)))?;
 
     let root = document
         .as_object_mut()
@@ -50,7 +52,8 @@ pub fn set_package_json_version(
             serde_json::Value::String(version.into()),
         );
 
-        json::save(&document).map_err(PackageJsonError::ParseJson)?
+        json::serialize(&document)
+            .map_err(|error| PackageJsonError::SerializeJson(Box::new(error)))?
     } else {
         contents
     };
@@ -109,10 +112,8 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 
 #[cfg(test)]
 mod test_set_package_json_version {
-    use super::{PackageJsonError, set_package_json_version};
-
     #[test]
-    fn it_should_modify_version() -> Result<(), PackageJsonError> {
+    fn it_should_modify_version() -> Result<(), super::PackageJsonError> {
         let version = "1.2.3";
 
         let input = "{
@@ -132,7 +133,7 @@ mod test_set_package_json_version {
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = set_package_json_version(input.to_string(), version)?;
+        let (modified, output) = super::set_package_json_version(input.to_string(), version)?;
 
         assert!(modified);
 
@@ -140,7 +141,7 @@ mod test_set_package_json_version {
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = set_package_json_version(output.to_string(), version)?;
+            let (modified, output) = super::set_package_json_version(output, version)?;
 
             assert!(!modified);
 

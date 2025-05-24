@@ -5,7 +5,7 @@ pub enum ShardYmlError {
     InvalidDocument,
     InvalidVersionFieldDataType,
     MissingVersionField,
-    ParseYml(marked_yaml::LoadError),
+    ParseYml(Box<marked_yaml::LoadError>),
 }
 
 impl core::error::Error for ShardYmlError {}
@@ -27,9 +27,7 @@ pub fn set_shard_yml_version(
     input: String,
     version: &str,
 ) -> Result<(bool, String), ShardYmlError> {
-    let document = yaml::parse(&input).map_err(ShardYmlError::ParseYml)?;
-
-    let mut output = input.clone();
+    let document = yaml::parse(&input).map_err(|error| ShardYmlError::ParseYml(Box::new(error)))?;
 
     let map = document
         .as_mapping()
@@ -43,14 +41,14 @@ pub fn set_shard_yml_version(
         .as_scalar()
         .ok_or(ShardYmlError::InvalidVersionFieldDataType)?;
 
-    output = yaml::replace_node(&output, scalar, version);
+    let output = yaml::replace_node(&input, scalar, version);
 
     let modified = output != input;
 
-    output = if modified {
-        yaml::save(&output)
+    let output = if modified {
+        yaml::serialize(&output)
     } else {
-        output
+        input
     };
 
     Ok((modified, output))
@@ -63,8 +61,6 @@ pub const fn update_lock_files(_path: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_shard_yml_version {
-    use super::ShardYmlError;
-
     const INPUT: &str = r#"name: crystal-demo
 version:          0.1.0
 
@@ -77,7 +73,7 @@ license:     MIT
 "#;
 
     #[test]
-    fn it_should_update_version() -> Result<(), ShardYmlError> {
+    fn it_should_update_version() -> Result<(), super::ShardYmlError> {
         let version = "2025.05.23+1722";
 
         let new_version_line = format!("version:          {version}");
@@ -96,7 +92,7 @@ license:     MIT
     }
 
     #[test]
-    fn it_support_multiline_strings() -> Result<(), ShardYmlError> {
+    fn it_support_multiline_strings() -> Result<(), super::ShardYmlError> {
         let input = INPUT.replace("version:          0.1.0", "version:\n          0.1.0");
 
         let version = "2025.05.23+1722";
@@ -107,7 +103,7 @@ license:     MIT
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_shard_yml_version(input.to_string(), version)?;
+        let (modified, output) = super::set_shard_yml_version(input, version)?;
 
         assert!(modified);
 

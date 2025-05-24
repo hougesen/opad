@@ -12,7 +12,7 @@ pub fn parse(input: &str) -> Result<marked_yaml::Node, marked_yaml::LoadError> {
 }
 
 #[inline]
-pub fn save(input: &str) -> String {
+pub fn serialize(input: &str) -> String {
     format!("{}\n", input.trim())
 }
 
@@ -54,7 +54,7 @@ name: Mads Hougesen
 "#;
 
     #[test]
-    fn it_should_support_comments() -> Result<(), crate::error::Error> {
+    fn it_should_support_comments() -> Result<(), marked_yaml::LoadError> {
         let mut document = super::parse(INPUT)?;
 
         let mut output = String::new();

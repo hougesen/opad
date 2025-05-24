@@ -1,4 +1,4 @@
-use super::{PackageJsonError, npm};
+use super::npm::{self, PackageJsonError};
 
 /// `elm.json` follows the same format as `package.json` (?)
 #[inline]
