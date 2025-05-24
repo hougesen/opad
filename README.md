@@ -1,4 +1,4 @@
-# crosspmv
+# opad
 
 Easily manage package version across multiple package manager systems in mono repositories.
 
