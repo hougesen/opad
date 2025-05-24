@@ -2,11 +2,11 @@
 name = "opad"
 version = { workspace = true }
 edition = { workspace = true }
-description = "Easily set package version across multiple package manager systems in mono repositories"
+description = "Easily manage package version across multiple package manager systems in mono repositories"
 authors = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-keywords = ["monorepository"]
+keywords = ["monorepository", "package-management"]
 homepage = { workspace = true }
 readme = { workspace = true }
 documentation = { workspace = true }
