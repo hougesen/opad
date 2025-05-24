@@ -1,6 +1,6 @@
 use crate::parsers::yaml;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ShardYmlError {
     InvalidDocument,
     InvalidVersionFieldDataType,
@@ -61,6 +61,8 @@ pub const fn update_lock_files(_path: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_shard_yml_version {
+    use crate::package_managers::crystal::ShardYmlError;
+
     const INPUT: &str = r#"name: crystal-demo
 version:          0.1.0
 
@@ -110,5 +112,15 @@ license:     MIT
         assert_eq!(output, expected_output);
 
         Ok(())
+    }
+
+    #[test]
+    fn should_require_version_field() {
+        let input = "hello: world";
+
+        let result = super::set_shard_yml_version(input.to_string(), "5.1.23")
+            .expect_err("it to return an error");
+
+        assert_eq!(result, super::ShardYmlError::MissingVersionField);
     }
 }
