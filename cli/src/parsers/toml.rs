@@ -4,10 +4,10 @@ pub fn parse(contents: &str) -> Result<toml_edit::DocumentMut, toml_edit::TomlEr
 }
 
 #[inline]
-pub fn save(path: &std::path::Path, document: &toml_edit::DocumentMut) -> std::io::Result<()> {
+pub fn serialize(document: &toml_edit::DocumentMut) -> String {
     let serialized = document.to_string();
 
-    std::fs::write(path, format!("{}\n", serialized.trim()))
+    format!("{}\n", serialized.trim())
 }
 
 #[cfg(test)]

@@ -7,6 +7,7 @@ pub enum PyprojectTomlError {
     InvalidVersionFieldDataType,
     MissingProjectField,
     MissingVersionField,
+    ParseToml(Box<toml_edit::TomlError>),
 }
 
 impl core::error::Error for PyprojectTomlError {}
@@ -21,15 +22,18 @@ impl core::fmt::Display for PyprojectTomlError {
             }
             Self::MissingProjectField => write!(f, "\"project\" field not found"),
             Self::MissingVersionField => write!(f, "\"project.version\" field not found"),
+            Self::ParseToml(error) => error.fmt(f),
         }
     }
 }
 
 #[inline]
-pub fn set_version(path: &std::path::Path, version: &str) -> Result<bool, crate::error::Error> {
-    let contents = std::fs::read_to_string(path)?;
-
-    let mut document = toml::parse(&contents)?;
+pub fn set_pyproject_version(
+    contents: String,
+    version: &str,
+) -> Result<(bool, String), PyprojectTomlError> {
+    let mut document =
+        toml::parse(&contents).map_err(|error| PyprojectTomlError::ParseToml(Box::new(error)))?;
 
     let package_raw = document
         .get_mut("project")
@@ -49,7 +53,7 @@ pub fn set_version(path: &std::path::Path, version: &str) -> Result<bool, crate:
 
     let modified = version_key_str != version;
 
-    if modified {
+    let output = if modified {
         package_table.insert(
             "version",
             toml_edit::Item::Value(toml_edit::Value::String(toml_edit::Formatted::new(
@@ -57,10 +61,12 @@ pub fn set_version(path: &std::path::Path, version: &str) -> Result<bool, crate:
             ))),
         );
 
-        toml::save(path, &document)?;
-    }
+        toml::serialize(&document)
+    } else {
+        contents
+    };
 
-    Ok(modified)
+    Ok((modified, output))
 }
 
 #[inline]
@@ -108,11 +114,9 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 }
 
 #[cfg(test)]
-mod test_set_version {
-    use super::set_version;
-
+mod test_set_pyproject_version {
     #[test]
-    fn it_should_modify_version() -> Result<(), crate::error::Error> {
+    fn it_should_modify_version() -> Result<(), super::PyprojectTomlError> {
         let version = "1.2.3";
 
         let input = "[project]
@@ -131,29 +135,17 @@ dependencies = []
 
         assert!(expected_output.contains(&new_version_line));
 
-        let dir = tempfile::tempdir()?;
+        let (modified, output) = super::set_pyproject_version(input.to_string(), version)?;
 
-        let path = dir.path().join("pyproject.toml");
+        assert!(modified);
 
-        std::fs::write(&path, input)?;
-
-        {
-            let modified = set_version(&path, version)?;
-
-            assert!(modified);
-
-            let output = std::fs::read_to_string(&path)?;
-
-            assert_eq!(output, expected_output);
-        };
+        assert_eq!(output, expected_output);
 
         // Validate we do not modify file if version is the same
         {
-            let modified = set_version(&path, version)?;
+            let (modified, output) = super::set_pyproject_version(output, version)?;
 
             assert!(!modified);
-
-            let output = std::fs::read_to_string(&path)?;
 
             assert_eq!(output, expected_output);
         }

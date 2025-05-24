@@ -18,6 +18,7 @@ Easily manage package version across multiple package manager systems in mono re
 | `Gleam`                    | `gleam`         | `gleam.toml`     | n/a (`manifest.toml` does not include version)            |
 | `Dart`                     | `pub`           | `gleam.toml`     | n/a (`pubspec.lock` does not include version)             |
 | `Crystal`                  | `shards`        | `shard.yml`      | n/a (`shard.lock` does not include version)               |
+| `Elm`                      | `elm`           | `elm.json`       | n/a (elm does not have a lock file (?))                   |
 
 ## Disclaimer
 

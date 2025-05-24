@@ -5,6 +5,7 @@ pub enum ShardYmlError {
     InvalidDocument,
     InvalidVersionFieldDataType,
     MissingVersionField,
+    ParseYml(Box<marked_yaml::LoadError>),
 }
 
 impl core::error::Error for ShardYmlError {}
@@ -16,18 +17,17 @@ impl core::fmt::Display for ShardYmlError {
             Self::InvalidDocument => write!(f, "Document is not to parseable"),
             Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
             Self::MissingVersionField => write!(f, "\"version\" field not found"),
+            Self::ParseYml(error) => error.fmt(f),
         }
     }
 }
 
 #[inline]
 pub fn set_shard_yml_version(
-    path: &std::path::Path,
+    input: String,
     version: &str,
-) -> Result<bool, crate::error::Error> {
-    let mut contents = std::fs::read_to_string(path)?;
-
-    let document = yaml::parse(&contents)?;
+) -> Result<(bool, String), ShardYmlError> {
+    let document = yaml::parse(&input).map_err(|error| ShardYmlError::ParseYml(Box::new(error)))?;
 
     let map = document
         .as_mapping()
@@ -41,17 +41,17 @@ pub fn set_shard_yml_version(
         .as_scalar()
         .ok_or(ShardYmlError::InvalidVersionFieldDataType)?;
 
-    let output = yaml::replace_node(&contents, scalar, version);
+    let output = yaml::replace_node(&input, scalar, version);
 
-    let modified = output != contents;
+    let modified = output != input;
 
-    contents = output;
+    let output = if modified {
+        yaml::serialize(&output)
+    } else {
+        input
+    };
 
-    if modified {
-        yaml::save(path, &contents)?;
-    }
-
-    Ok(modified)
+    Ok((modified, output))
 }
 
 #[inline]
@@ -61,7 +61,6 @@ pub const fn update_lock_files(_path: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_shard_yml_version {
-
     const INPUT: &str = r#"name: crystal-demo
 version:          0.1.0
 
@@ -74,7 +73,7 @@ license:     MIT
 "#;
 
     #[test]
-    fn it_should_update_version() -> Result<(), crate::error::Error> {
+    fn it_should_update_version() -> Result<(), super::ShardYmlError> {
         let version = "2025.05.23+1722";
 
         let new_version_line = format!("version:          {version}");
@@ -83,17 +82,9 @@ license:     MIT
 
         assert!(expected_output.contains(&new_version_line));
 
-        let dir = tempfile::tempdir()?;
-
-        let path = dir.path().join("shard.yml");
-
-        std::fs::write(&path, INPUT)?;
-
-        let modified = super::set_shard_yml_version(&path, version)?;
+        let (modified, output) = super::set_shard_yml_version(INPUT.to_string(), version)?;
 
         assert!(modified);
-
-        let output = std::fs::read_to_string(&path)?;
 
         assert_eq!(output, expected_output);
 
@@ -101,7 +92,7 @@ license:     MIT
     }
 
     #[test]
-    fn it_support_multiline_strings() -> Result<(), crate::error::Error> {
+    fn it_support_multiline_strings() -> Result<(), super::ShardYmlError> {
         let input = INPUT.replace("version:          0.1.0", "version:\n          0.1.0");
 
         let version = "2025.05.23+1722";
@@ -112,16 +103,9 @@ license:     MIT
 
         assert!(expected_output.contains(&new_version_line));
 
-        let dir = tempfile::tempdir()?;
-
-        let path = dir.path().join("pubspec.yaml");
-
-        std::fs::write(&path, &input)?;
-        let modified = super::set_shard_yml_version(&path, version)?;
+        let (modified, output) = super::set_shard_yml_version(input, version)?;
 
         assert!(modified);
-
-        let output = std::fs::read_to_string(&path)?;
 
         assert_eq!(output, expected_output);
 

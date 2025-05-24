@@ -8,6 +8,7 @@ pub enum CargoTomlError {
     InvalidWorkspaceFieldDataType,
     MissingPackageField { workspace: bool },
     MissingVersionField { workspace: bool },
+    ParseToml(Box<toml_edit::TomlError>),
 }
 
 impl core::error::Error for CargoTomlError {}
@@ -16,6 +17,7 @@ impl core::fmt::Display for CargoTomlError {
     #[inline]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
+            Self::ParseToml(error) => error.fmt(f),
             Self::InvalidVersionFieldDataType { workspace } => {
                 let field = if *workspace {
                     "\"workspace.package.version\""
@@ -87,12 +89,11 @@ fn set_package_version(
 
 #[inline]
 pub fn set_cargo_toml_version(
-    path: &std::path::Path,
+    contents: String,
     version: &str,
-) -> Result<bool, crate::error::Error> {
-    let contents = std::fs::read_to_string(path)?;
-
-    let mut document = toml::parse(&contents)?;
+) -> Result<(bool, String), CargoTomlError> {
+    let mut document =
+        toml::parse(&contents).map_err(|error| CargoTomlError::ParseToml(Box::new(error)))?;
 
     let mut modified = false;
 
@@ -117,16 +118,16 @@ pub fn set_cargo_toml_version(
 
         modified |= set_package_version(package_table, version, false)?;
     } else {
-        return Err(crate::error::Error::from(
-            CargoTomlError::MissingPackageField { workspace: false },
-        ));
+        return Err(CargoTomlError::MissingPackageField { workspace: false });
     }
 
-    if modified {
-        toml::save(path, &document)?;
-    }
+    let output = if modified {
+        toml::serialize(&document)
+    } else {
+        contents
+    };
 
-    Ok(modified)
+    Ok((modified, output))
 }
 
 #[inline]
@@ -143,10 +144,8 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 
 #[cfg(test)]
 mod test_set_cargo_toml_version {
-    use crate::package_managers::cargo::set_cargo_toml_version;
-
     #[test]
-    fn it_should_modify_version() -> Result<(), crate::error::Error> {
+    fn it_should_modify_version() -> Result<(), super::CargoTomlError> {
         let version = "1.2.3";
 
         let input = r#"[package]
@@ -174,29 +173,17 @@ toml_edit = "0.22.26"
 
         assert!(expected_output.contains(&new_version_line));
 
-        let dir = tempfile::tempdir()?;
+        let (modified, output) = super::set_cargo_toml_version(input.to_string(), version)?;
 
-        let path = dir.path().join("Cargo.toml");
+        assert!(modified);
 
-        std::fs::write(&path, input)?;
-
-        {
-            let modified = set_cargo_toml_version(&path, version)?;
-
-            assert!(modified);
-
-            let output = std::fs::read_to_string(&path)?;
-
-            assert_eq!(output, expected_output);
-        };
+        assert_eq!(output, expected_output);
 
         // Validate we do not modify file if version is the same
         {
-            let modified = set_cargo_toml_version(&path, version)?;
+            let (modified, output) = super::set_cargo_toml_version(output, version)?;
 
             assert!(!modified);
-
-            let output = std::fs::read_to_string(&path)?;
 
             assert_eq!(output, expected_output);
         }
@@ -205,7 +192,7 @@ toml_edit = "0.22.26"
     }
 
     #[test]
-    fn it_should_modify_version_workspace() -> Result<(), crate::error::Error> {
+    fn it_should_modify_version_workspace() -> Result<(), super::CargoTomlError> {
         let version = "1.2.3";
 
         let input = r#"[workspace]
@@ -240,29 +227,17 @@ toml_edit = "0.22.26"
 
         assert!(expected_output.contains(&new_version_line));
 
-        let dir = tempfile::tempdir()?;
+        let (modified, output) = super::set_cargo_toml_version(input.to_string(), version)?;
 
-        let path = dir.path().join("Cargo.toml");
+        assert!(modified);
 
-        std::fs::write(&path, input)?;
-
-        {
-            let modified = set_cargo_toml_version(&path, version)?;
-
-            assert!(modified);
-
-            let output = std::fs::read_to_string(&path)?;
-
-            assert_eq!(output, expected_output);
-        };
+        assert_eq!(output, expected_output);
 
         // Validate we do not modify file if version is the same
         {
-            let modified = set_cargo_toml_version(&path, version)?;
+            let (modified, output) = super::set_cargo_toml_version(output, version)?;
 
             assert!(!modified);
-
-            let output = std::fs::read_to_string(&path)?;
 
             assert_eq!(output, expected_output);
         }
