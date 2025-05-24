@@ -64,6 +64,11 @@ pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_pubspec_version {
+    use crate::package_managers::{
+        error::PackageManagerError,
+        pubspec::{PubspecYamlError, set_pubspec_version},
+    };
+
     const INPUT: &str = r#"name: someapplication
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
@@ -216,5 +221,36 @@ flutter:
         assert_eq!(output, expected_output);
 
         Ok(())
+    }
+
+    #[test]
+    fn it_should_require_version_field() {
+        let input = "name: Mads\n";
+
+        let result = set_pubspec_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(result, PubspecYamlError::MissingVersionField));
+
+        assert!(result.to_string().contains("\"version\""));
+
+        PackageManagerError::from(result).test_up_casting();
+    }
+
+    #[test]
+    fn version_field_should_be_string() {
+        let input = "version:\n  - value1\n";
+
+        let result = set_pubspec_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            PubspecYamlError::InvalidVersionFieldDataType
+        ));
+
+        assert!(result.to_string().contains("\"version\""));
+
+        PackageManagerError::from(result).test_up_casting();
     }
 }

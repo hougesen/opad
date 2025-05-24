@@ -112,6 +112,10 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 
 #[cfg(test)]
 mod test_set_package_json_version {
+    use crate::package_managers::error::PackageManagerError;
+
+    use super::{PackageJsonError, set_package_json_version};
+
     #[test]
     fn it_should_modify_version() -> Result<(), super::PackageJsonError> {
         let version = "1.2.3";
@@ -133,7 +137,7 @@ mod test_set_package_json_version {
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_package_json_version(input.to_string(), version)?;
+        let (modified, output) = set_package_json_version(input.to_string(), version)?;
 
         assert!(modified);
 
@@ -141,7 +145,7 @@ mod test_set_package_json_version {
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = super::set_package_json_version(output, version)?;
+            let (modified, output) = set_package_json_version(output, version)?;
 
             assert!(!modified);
 
@@ -155,14 +159,30 @@ mod test_set_package_json_version {
     fn it_should_require_version_field() {
         let input = "{ \"name\": \"Mads\" }";
 
-        let result = super::set_package_json_version(input.to_string(), "5.1.23")
+        let result = set_package_json_version(input.to_string(), "5.1.23")
+            .expect_err("it to return an error");
+
+        assert!(matches!(result, PackageJsonError::MissingVersionField));
+
+        assert!(result.to_string().contains("\"version\""));
+
+        PackageManagerError::from(result).test_up_casting();
+    }
+
+    #[test]
+    fn version_field_should_be_a_string() {
+        let input = "{ \"version\": {} }";
+
+        let result = set_package_json_version(input.to_string(), "5.1.23")
             .expect_err("it to return an error");
 
         assert!(matches!(
             result,
-            super::PackageJsonError::MissingVersionField
+            PackageJsonError::InvalidVersionFieldDataType
         ));
 
         assert!(result.to_string().contains("\"version\""));
+
+        PackageManagerError::from(result).test_up_casting();
     }
 }
