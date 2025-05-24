@@ -145,6 +145,58 @@ Choose whether to update the associated lock files:
 | `Crystal`                  | `shards`        | `shard.yml`      | n/a (`shard.lock` does not include version)               |
 | `Elm`                      | `elm`           | `elm.json`       | n/a (elm does not have a lock file (?))                   |
 
+## Shell completion
+
+Shell completion can be generated using the `opad --completions $SHELL` command.
+
+### Bash
+
+Add the following to your `.bashrc`.
+
+```bash
+eval "$(opad --completions bash)"
+```
+
+### Zsh
+
+Add the following to your `.zshrc`:
+
+```zsh
+eval "$(opad --completions zsh)"
+```
+
+### Fish
+
+Add the following to `~/.config/fish/config.fish`.
+
+```fish
+opad --completions fish | source
+```
+
+### PowerShell
+
+Add the following to your PowerShell configuration (Can be found by running `$PROFILE`).
+
+```powershell
+Invoke-Expression (&opad --completions powershell)
+```
+
+### Elvish
+
+Add the following to `~/.elvish/rc.elv`.
+
+```elvish
+eval (opad --completions elvish)
+```
+
+### Nushell
+
+Generate completions for [nushell](https://github.com/nushell/nushell).
+
+```nushell
+opad --completions nushell
+```
+
 ## Disclaimer
 
 Not all file parsers used by this tool respect prior formatting, so you might want to run your preferred formatting tool on the files after usage.
