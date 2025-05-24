@@ -1,5 +1,25 @@
 use crate::parsers::yaml;
 
+#[derive(Debug)]
+pub enum PubspecYamlError {
+    InvalidDocument,
+    InvalidVersionFieldDataType,
+    MissingVersionField,
+}
+
+impl core::error::Error for PubspecYamlError {}
+
+impl core::fmt::Display for PubspecYamlError {
+    #[inline]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::InvalidDocument => write!(f, "Document is not to parseable"),
+            Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
+            Self::MissingVersionField => write!(f, "\"version\" field not found"),
+        }
+    }
+}
+
 #[inline]
 pub fn set_pubspec_version(
     path: &std::path::Path,
@@ -9,19 +29,23 @@ pub fn set_pubspec_version(
 
     let document = yaml::parse(&contents)?;
 
-    let mut modified = false;
+    let map = document
+        .as_mapping()
+        .ok_or(PubspecYamlError::InvalidDocument)?;
 
-    if let Some(map) = document.as_mapping() {
-        if let Some(version_node) = map.get_node("version") {
-            if let Some(scalar) = version_node.as_scalar() {
-                let output = yaml::replace_node(&contents, scalar, version);
+    let version_node = map
+        .get_node("version")
+        .ok_or(PubspecYamlError::MissingVersionField)?;
 
-                modified = output != contents;
+    let scalar = version_node
+        .as_scalar()
+        .ok_or(PubspecYamlError::InvalidVersionFieldDataType)?;
 
-                contents = output;
-            }
-        }
-    }
+    let output = yaml::replace_node(&contents, scalar, version);
+
+    let modified = output != contents;
+
+    contents = output;
 
     if modified {
         yaml::save(path, &contents)?;

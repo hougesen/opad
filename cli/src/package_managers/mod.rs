@@ -1,5 +1,6 @@
 pub use cargo::CargoTomlError;
 pub use crystal::ShardYmlError;
+pub use pubspec::PubspecYamlError;
 
 mod cargo;
 mod crystal;
