@@ -120,7 +120,12 @@ mod test_set_pyproject_version {
 
     #[test]
     fn it_should_modify_version() {
-        let version = "1.2.3";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let input = "[project]
 version = \"0.0.0\"
@@ -139,7 +144,7 @@ dependencies = []
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            set_pyproject_version(input.to_string(), version).expect("it to not raise");
+            set_pyproject_version(input.to_string(), &version).expect("it to not raise");
 
         assert!(modified);
 
@@ -148,7 +153,7 @@ dependencies = []
         // Validate we do not modify file if version is the same
         {
             let (modified, output) =
-                set_pyproject_version(output, version).expect("it not to raise");
+                set_pyproject_version(output, &version).expect("it not to raise");
 
             assert!(!modified);
 

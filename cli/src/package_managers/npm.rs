@@ -117,7 +117,12 @@ mod test_set_package_json_version {
 
     #[test]
     fn it_should_modify_version() {
-        let version = "1.2.3";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let input = "{
   \"name\": \"npm\",
@@ -137,7 +142,7 @@ mod test_set_package_json_version {
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            set_package_json_version(input.to_string(), version).expect("it not to raise");
+            set_package_json_version(input.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
@@ -146,7 +151,7 @@ mod test_set_package_json_version {
         // Validate we do not modify file if version is the same
         {
             let (modified, output) =
-                set_package_json_version(output, version).expect("it not to raise");
+                set_package_json_version(output, &version).expect("it not to raise");
 
             assert!(!modified);
 

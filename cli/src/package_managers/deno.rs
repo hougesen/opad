@@ -43,14 +43,19 @@ mod test_set_deno_json_version {
 
     #[test]
     fn it_should_set_version() {
-        let version = "1.555.2";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
         let version_str = format!("\"version\": \"{version}\"");
 
         let expected_output = INPUT.replace("\"version\": \"0.0.0\"", &version_str);
         assert!(expected_output.contains(&version_str));
 
         let (modified, output) =
-            set_deno_json_version(INPUT.to_string(), version).expect("it not to raise");
+            set_deno_json_version(INPUT.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
         assert_eq!(output, expected_output);
@@ -58,7 +63,7 @@ mod test_set_deno_json_version {
         // Validate we do not modify file if version is the same
         {
             let (modified, output) =
-                set_deno_json_version(output, version).expect("it not to raise");
+                set_deno_json_version(output, &version).expect("it not to raise");
 
             assert!(!modified);
 

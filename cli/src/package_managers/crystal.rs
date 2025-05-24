@@ -77,7 +77,12 @@ license:     MIT
 
     #[test]
     fn it_should_update_version() {
-        let version = "2025.05.23+1722";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version:          {version}");
 
@@ -86,18 +91,33 @@ license:     MIT
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            set_shard_yml_version(INPUT.to_string(), version).expect("it not to raise");
+            set_shard_yml_version(INPUT.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
+
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_shard_yml_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
     }
 
     #[test]
     fn it_support_multiline_strings() {
         let input = INPUT.replace("version:          0.1.0", "version:\n          0.1.0");
 
-        let version = "2025.05.23+1722";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version:\n          {version}");
 
@@ -105,11 +125,21 @@ license:     MIT
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = set_shard_yml_version(input, version).expect("it not to throw");
+        let (modified, output) = set_shard_yml_version(input, &version).expect("it not to throw");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
+
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_shard_yml_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
     }
 
     #[test]

@@ -149,7 +149,12 @@ mod test_set_cargo_toml_version {
 
     #[test]
     fn it_should_modify_version() {
-        let version = "1.2.3";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let input = r#"[package]
 version = "0.0.0"
@@ -177,7 +182,7 @@ toml_edit = "0.22.26"
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            set_cargo_toml_version(input.to_string(), version).expect("it not to raise");
+            set_cargo_toml_version(input.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
@@ -186,7 +191,7 @@ toml_edit = "0.22.26"
         // Validate we do not modify file if version is the same
         {
             let (modified, output) =
-                set_cargo_toml_version(output, version).expect("it not to raise");
+                set_cargo_toml_version(output, &version).expect("it not to raise");
 
             assert!(!modified);
 
@@ -196,7 +201,12 @@ toml_edit = "0.22.26"
 
     #[test]
     fn it_should_modify_version_workspace() {
-        let version = "1.2.3";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let input = r#"[workspace]
 members = ["cli"]
@@ -231,7 +241,7 @@ toml_edit = "0.22.26"
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            set_cargo_toml_version(input.to_string(), version).expect("it not to raise");
+            set_cargo_toml_version(input.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
@@ -240,7 +250,7 @@ toml_edit = "0.22.26"
         // Validate we do not modify file if version is the same
         {
             let (modified, output) =
-                set_cargo_toml_version(output, version).expect("it not to raise");
+                set_cargo_toml_version(output, &version).expect("it not to raise");
 
             assert!(!modified);
 

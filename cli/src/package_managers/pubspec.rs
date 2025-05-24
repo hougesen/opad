@@ -183,7 +183,12 @@ flutter:
 
     #[test]
     fn it_should_update_version() {
-        let version = "2025.05.23+1722";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version: {version}");
 
@@ -192,18 +197,33 @@ flutter:
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            set_pubspec_version(INPUT.to_string(), version).expect("it not to raise");
+            set_pubspec_version(INPUT.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
+
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_pubspec_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
     }
 
     #[test]
     fn it_support_multiline_strings() {
         let input = INPUT.replace("version: 1.0.7+21", "version:\n   1.0.7+21");
 
-        let version = "2025.05.23+1722";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let new_version_line = format!("version:\n   {version}");
 
@@ -211,11 +231,21 @@ flutter:
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = set_pubspec_version(input, version).expect("it not to raise");
+        let (modified, output) = set_pubspec_version(input, &version).expect("it not to raise");
 
         assert!(modified);
 
         assert_eq!(output, expected_output);
+
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_pubspec_version(output, &version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
     }
 
     #[test]

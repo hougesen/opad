@@ -68,7 +68,12 @@ mod test_set_gleam_toml_version {
 
     #[test]
     fn it_should_modify_version() {
-        let version = "1.2.3";
+        let version = format!(
+            "{}.{}.{}",
+            rand::random::<u16>(),
+            rand::random::<u16>(),
+            rand::random::<u16>()
+        );
 
         let input = r#"name = "sgleam_demo"
 version = "0.0.0"
@@ -98,7 +103,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
         assert!(expected_output.contains(&new_version_line));
 
         let (modified, output) =
-            set_gleam_toml_version(input.to_string(), version).expect("it not to raise");
+            set_gleam_toml_version(input.to_string(), &version).expect("it not to raise");
 
         assert!(modified);
 
@@ -107,7 +112,7 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
         // Validate we do not modify file if version is the same
         {
             let (modified, output) =
-                set_gleam_toml_version(output, version).expect("it not to raise");
+                set_gleam_toml_version(output, &version).expect("it not to raise");
 
             assert!(!modified);
 
