@@ -13,7 +13,7 @@ pub fn set_deno_json_version(
 }
 
 #[inline]
-fn deno_update_lock_file_command() -> std::process::Command {
+pub fn deno_update_lock_file_command() -> std::process::Command {
     let mut cmd = std::process::Command::new("deno");
     cmd.arg("install");
     cmd

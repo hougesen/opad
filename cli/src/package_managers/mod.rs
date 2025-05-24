@@ -125,7 +125,7 @@ impl PackageManagerFile {
     }
 
     #[inline]
-    pub fn update_lock_files(&self) -> std::io::Result<bool> {
+    pub fn update_lock_files(&self) -> Result<bool, crate::error::Error> {
         let canon = self.path.canonicalize()?;
 
         let dir = canon.parent().unwrap_or(&self.path);
@@ -134,7 +134,7 @@ impl PackageManagerFile {
             PackageManager::CargoToml => cargo::update_lock_files(dir)?,
             PackageManager::DenoJson => deno::update_lock_files(dir)?,
             PackageManager::ElmJson => elm::update_lock_files(dir),
-            PackageManager::LernaJson => lerna::update_lock_files(dir),
+            PackageManager::LernaJson => lerna::update_lock_files(dir)?,
             PackageManager::GleamToml => gleam::update_lock_files(dir),
             PackageManager::PackageJson => npm::update_lock_files(dir)?,
             PackageManager::PubspecYaml => pubspec::update_lock_files(dir),
