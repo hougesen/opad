@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.0.0...HEAD)
 
+- docs: usage guide [`#41`](https://github.com/hougesen/opad/pull/41)
+- test: package manager invalid inputs [`#40`](https://github.com/hougesen/opad/pull/40)
 - refactor: remove side effects from set version fns [`#39`](https://github.com/hougesen/opad/pull/39)
 
 #### v0.0.0
