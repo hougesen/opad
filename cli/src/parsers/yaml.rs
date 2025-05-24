@@ -12,8 +12,8 @@ pub fn parse(input: &str) -> Result<marked_yaml::Node, marked_yaml::LoadError> {
 }
 
 #[inline]
-pub fn save(path: &std::path::Path, input: &str) -> std::io::Result<()> {
-    std::fs::write(path, format!("{}\n", input.trim()))
+pub fn save(input: &str) -> String {
+    format!("{}\n", input.trim())
 }
 
 #[inline]

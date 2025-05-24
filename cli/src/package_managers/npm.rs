@@ -6,6 +6,7 @@ pub enum PackageJsonError {
     DocumentNotAnObject,
     InvalidVersionFieldDataType,
     MissingVersionField,
+    ParseJson(serde_json::Error),
 }
 
 impl core::error::Error for PackageJsonError {}
@@ -17,18 +18,17 @@ impl core::fmt::Display for PackageJsonError {
             Self::DocumentNotAnObject => write!(f, "Document is not an object"),
             Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
             Self::MissingVersionField => write!(f, "\"version\" field not found"),
+            Self::ParseJson(error) => error.fmt(f),
         }
     }
 }
 
 #[inline]
 pub fn set_package_json_version(
-    path: &std::path::Path,
+    contents: String,
     version: &str,
-) -> Result<bool, crate::error::Error> {
-    let contents = std::fs::read_to_string(path)?;
-
-    let mut document = json::parse(&contents)?;
+) -> Result<(bool, String), PackageJsonError> {
+    let mut document = json::parse(&contents).map_err(PackageJsonError::ParseJson)?;
 
     let root = document
         .as_object_mut()
@@ -44,16 +44,18 @@ pub fn set_package_json_version(
 
     let modified = version_key_str != version;
 
-    if modified {
+    let output = if modified {
         root.insert(
             "version".to_owned(),
             serde_json::Value::String(version.into()),
         );
 
-        json::save(path, &document)?;
-    }
+        json::save(&document).map_err(PackageJsonError::ParseJson)?
+    } else {
+        contents
+    };
 
-    Ok(modified)
+    Ok((modified, output))
 }
 
 #[inline]
@@ -107,10 +109,10 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 
 #[cfg(test)]
 mod test_set_package_json_version {
-    use super::set_package_json_version;
+    use super::{PackageJsonError, set_package_json_version};
 
     #[test]
-    fn it_should_modify_version() -> Result<(), crate::error::Error> {
+    fn it_should_modify_version() -> Result<(), PackageJsonError> {
         let version = "1.2.3";
 
         let input = "{
@@ -130,29 +132,17 @@ mod test_set_package_json_version {
 
         assert!(expected_output.contains(&new_version_line));
 
-        let dir = tempfile::tempdir()?;
+        let (modified, output) = set_package_json_version(input.to_string(), version)?;
 
-        let path = dir.path().join("package.json");
+        assert!(modified);
 
-        std::fs::write(&path, input)?;
-
-        {
-            let modified = set_package_json_version(&path, version)?;
-
-            assert!(modified);
-
-            let output = std::fs::read_to_string(&path)?;
-
-            assert_eq!(output, expected_output);
-        };
+        assert_eq!(output, expected_output);
 
         // Validate we do not modify file if version is the same
         {
-            let modified = set_package_json_version(&path, version)?;
+            let (modified, output) = set_package_json_version(output.to_string(), version)?;
 
             assert!(!modified);
-
-            let output = std::fs::read_to_string(&path)?;
 
             assert_eq!(output, expected_output);
         }

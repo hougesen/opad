@@ -105,17 +105,25 @@ impl PackageManagerFile {
     }
 
     #[inline]
-    pub fn set_package_version(&self, version: &str) -> Result<bool, crate::error::Error> {
-        match self.package_manager {
-            PackageManager::CargoToml => cargo::set_cargo_toml_version(&self.path, version),
-            PackageManager::DenoJson => deno::set_deno_json_version(&self.path, version),
-            PackageManager::ElmJson => elm::set_elm_json_version(&self.path, version),
-            PackageManager::GleamToml => gleam::set_gleam_toml_version(&self.path, version),
-            PackageManager::PackageJson => npm::set_package_json_version(&self.path, version),
-            PackageManager::PubspecYaml => pubspec::set_pubspec_version(&self.path, version),
-            PackageManager::PyProjectToml => pyproject::set_version(&self.path, version),
-            PackageManager::ShardYml => crystal::set_shard_yml_version(&self.path, version),
+    pub fn set_package_version(&self, version: &str) -> Result<(), crate::error::Error> {
+        let contents = std::fs::read_to_string(&self.path)?;
+
+        let (modified, output) = match self.package_manager {
+            PackageManager::CargoToml => cargo::set_cargo_toml_version(contents, version)?,
+            PackageManager::DenoJson => deno::set_deno_json_version(contents, version)?,
+            PackageManager::ElmJson => elm::set_elm_json_version(contents, version)?,
+            PackageManager::GleamToml => gleam::set_gleam_toml_version(contents, version)?,
+            PackageManager::PackageJson => npm::set_package_json_version(contents, version)?,
+            PackageManager::PubspecYaml => pubspec::set_pubspec_version(contents, version)?,
+            PackageManager::PyProjectToml => pyproject::set_version(contents, version)?,
+            PackageManager::ShardYml => crystal::set_shard_yml_version(contents, version)?,
+        };
+
+        if modified {
+            std::fs::write(&self.path, output)?;
         }
+
+        Ok(())
     }
 
     #[inline]

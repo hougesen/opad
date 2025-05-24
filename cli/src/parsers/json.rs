@@ -4,13 +4,8 @@ pub fn parse(contents: &str) -> Result<serde_json::Value, serde_json::Error> {
 }
 
 #[inline]
-pub fn save(
-    path: &std::path::Path,
-    document: &serde_json::Value,
-) -> Result<(), crate::error::Error> {
+pub fn save(document: &serde_json::Value) -> Result<String, serde_json::Error> {
     let serialized = serde_json::to_string_pretty(&document)?;
 
-    std::fs::write(path, format!("{}\n", serialized.trim()))?;
-
-    Ok(())
+    Ok(format!("{}\n", serialized.trim()))
 }
