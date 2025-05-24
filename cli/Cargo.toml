@@ -1,5 +1,5 @@
 [package]
-name = "crosspmv"
+name = "opad"
 version = { workspace = true }
 edition = { workspace = true }
 description = "Easily set package version across multiple package manager systems in mono repositories"
@@ -11,6 +11,12 @@ homepage = { workspace = true }
 readme = { workspace = true }
 documentation = { workspace = true }
 categories = ["command-line-utilities", "development-tools"]
+
+[package.metadata.wix]
+upgrade-guid = "7F7EA683-233A-47AB-9C55-BE3AE1648468"
+path-guid = "5AD1BCF8-D6E3-4DD0-947C-4AE8D17020E9"
+license = false
+eula = false
 
 [dependencies]
 clap = { workspace = true }

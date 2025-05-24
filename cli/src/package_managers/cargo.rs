@@ -152,11 +152,11 @@ mod test_set_cargo_toml_version {
         let input = r#"[package]
 version = "0.0.0"
 edition = "2024"
-homepage = "https://github.com/hougesen/crosspmv?tab=readme-ov-file"
+homepage = "https://github.com/hougesen/opad?tab=readme-ov-file"
 authors = ["Mads Hougesen <mads@mhouge.dk>"]
 license = "MIT"
-repository = "https://github.com/hougesen/crosspmv"
-documentation = "https://github.com/hougesen/crosspmv#readme"
+repository = "https://github.com/hougesen/opad"
+documentation = "https://github.com/hougesen/opad#readme"
 
 [dependencies]
 crossterm = "0.29.0"
@@ -215,11 +215,11 @@ resolver = "3"
 [workspace.package]
 version = "0.0.0"
 edition = "2024"
-homepage = "https://github.com/hougesen/crosspmv?tab=readme-ov-file"
+homepage = "https://github.com/hougesen/opad?tab=readme-ov-file"
 authors = ["Mads Hougesen <mads@mhouge.dk>"]
 license = "MIT"
-repository = "https://github.com/hougesen/crosspmv"
-documentation = "https://github.com/hougesen/crosspmv#readme"
+repository = "https://github.com/hougesen/opad"
+documentation = "https://github.com/hougesen/opad#readme"
 
 [workspace.dependencies]
 crossterm = "0.29.0"
