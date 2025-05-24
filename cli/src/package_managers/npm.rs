@@ -1,6 +1,5 @@
-use crate::parsers::json;
-
 use super::run_update_lock_file_command;
+use crate::parsers::json;
 
 #[inline]
 pub fn set_package_json_version(

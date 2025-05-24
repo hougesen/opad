@@ -1,6 +1,5 @@
-use crate::parsers::toml;
-
 use super::run_update_lock_file_command;
+use crate::parsers::toml;
 
 #[inline]
 pub fn set_version(path: &std::path::Path, version: &str) -> Result<bool, crate::error::Error> {

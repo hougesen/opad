@@ -1,4 +1,7 @@
-pub mod cargo;
+pub use cargo::CargoTomlError;
+pub use crystal::ShardYmlError;
+
+mod cargo;
 mod crystal;
 mod deno;
 mod elm;

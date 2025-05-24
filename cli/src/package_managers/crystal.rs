@@ -1,5 +1,25 @@
 use crate::parsers::yaml;
 
+#[derive(Debug)]
+pub enum ShardYmlError {
+    InvalidDocument,
+    InvalidVersionFieldDataType,
+    MissingVersionField,
+}
+
+impl core::error::Error for ShardYmlError {}
+
+impl core::fmt::Display for ShardYmlError {
+    #[inline]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::InvalidDocument => write!(f, "Document is not to parseable"),
+            Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
+            Self::MissingVersionField => write!(f, "\"version\" field not found"),
+        }
+    }
+}
+
 #[inline]
 pub fn set_shard_yml_version(
     path: &std::path::Path,
@@ -9,19 +29,23 @@ pub fn set_shard_yml_version(
 
     let document = yaml::parse(&contents)?;
 
-    let mut modified = false;
+    let map = document
+        .as_mapping()
+        .ok_or(ShardYmlError::InvalidDocument)?;
 
-    if let Some(map) = document.as_mapping() {
-        if let Some(version_node) = map.get_node("version") {
-            if let Some(scalar) = version_node.as_scalar() {
-                let output = yaml::replace_node(&contents, scalar, version);
+    let version_node = map
+        .get_node("version")
+        .ok_or(ShardYmlError::MissingVersionField)?;
 
-                modified = output != contents;
+    let scalar = version_node
+        .as_scalar()
+        .ok_or(ShardYmlError::InvalidVersionFieldDataType)?;
 
-                contents = output;
-            }
-        }
-    }
+    let output = yaml::replace_node(&contents, scalar, version);
+
+    let modified = output != contents;
+
+    contents = output;
 
     if modified {
         yaml::save(path, &contents)?;

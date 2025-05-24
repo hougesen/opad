@@ -1,10 +1,13 @@
+use crate::package_managers::{CargoTomlError, ShardYmlError};
+
 #[derive(Debug)]
 pub enum Error {
-    CargoToml(crate::package_managers::cargo::CargoTomlError),
+    CargoToml(CargoTomlError),
     Inquire(inquire::InquireError),
     Io(std::io::Error),
     MarkedYaml(Box<marked_yaml::LoadError>),
     SerdeJson(Box<serde_json::Error>),
+    ShardYml(ShardYmlError),
     TomlEdit(Box<toml_edit::TomlError>),
 }
 
@@ -19,6 +22,7 @@ impl core::fmt::Display for Error {
             Self::Io(error) => error.fmt(f),
             Self::MarkedYaml(error) => error.fmt(f),
             Self::SerdeJson(error) => error.fmt(f),
+            Self::ShardYml(error) => error.fmt(f),
             Self::TomlEdit(error) => error.fmt(f),
         }
     }
@@ -59,9 +63,16 @@ impl From<serde_json::Error> for Error {
     }
 }
 
-impl From<crate::package_managers::cargo::CargoTomlError> for Error {
+impl From<CargoTomlError> for Error {
     #[inline]
-    fn from(value: crate::package_managers::cargo::CargoTomlError) -> Self {
+    fn from(value: CargoTomlError) -> Self {
         Self::CargoToml(value)
+    }
+}
+
+impl From<ShardYmlError> for Error {
+    #[inline]
+    fn from(value: ShardYmlError) -> Self {
+        Self::ShardYml(value)
     }
 }
