@@ -23,3 +23,46 @@ fn deno_update_lock_file_command() -> std::process::Command {
 pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
     run_update_lock_file_command(deno_update_lock_file_command(), dir)
 }
+
+#[cfg(test)]
+mod test_set_deno_json_version {
+    use super::set_deno_json_version;
+
+    const INPUT: &str = r#"{
+  "name": "my-lib",
+  "version": "0.0.0",
+  "exports": "./mod.ts",
+  "tasks": {
+    "dev": "deno test --watch mod.ts"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1"
+  }
+}
+"#;
+
+    #[test]
+    fn it_should_set_version() {
+        let version = "1.555.2";
+        let version_str = format!("\"version\": \"{version}\"");
+
+        let expected_output = INPUT.replace("\"version\": \"0.0.0\"", &version_str);
+        assert!(expected_output.contains(&version_str));
+
+        let (modified, output) =
+            set_deno_json_version(INPUT.to_string(), version).expect("it not to raise");
+
+        assert!(modified);
+        assert_eq!(output, expected_output);
+
+        // Validate we do not modify file if version is the same
+        {
+            let (modified, output) =
+                set_deno_json_version(output, version).expect("it not to raise");
+
+            assert!(!modified);
+
+            assert_eq!(output, expected_output);
+        }
+    }
+}

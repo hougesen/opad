@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. Dates are d
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.0.0...HEAD)
 
 - refactor: remove side effects from set version fns [`#39`](https://github.com/hougesen/opad/pull/39)
+- test: remaining error cases [`e10781b`](https://github.com/hougesen/opad/commit/e10781bca5ab29452f7c293cc29d0d4500994640)
 - test: gleam error cases [`d21f17d`](https://github.com/hougesen/opad/commit/d21f17d9a0e7bd1de83058f8b96f222700c7af95)
 - test: pubspec error cases [`417ae6d`](https://github.com/hougesen/opad/commit/417ae6db8e1236a14c01b1fcf845dc9d5aa44fa4)
 - test: validate cargo requires version field [`88d5ef4`](https://github.com/hougesen/opad/commit/88d5ef449a44937ddfa97ec4862f9ecb56b04b74)
