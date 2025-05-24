@@ -26,4 +26,5 @@ All notable changes to this project will be documented in this file. Dates are d
 - feat: naive support for package.json [`#3`](https://github.com/hougesen/crosspmv/pull/3)
 - feat: add support for cargo workspaces [`#2`](https://github.com/hougesen/crosspmv/pull/2)
 - feat: set Cargo.toml package version [`#1`](https://github.com/hougesen/crosspmv/pull/1)
+- feat: information errors for Cargo.toml [`032a78d`](https://github.com/hougesen/crosspmv/commit/032a78dca814967c7f98cd6b7ef7114505118b0c)
 - chore: add MIT license [`2e13548`](https://github.com/hougesen/crosspmv/commit/2e135488b26dc50e6d90d362a06c3978933189d3)
