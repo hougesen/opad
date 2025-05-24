@@ -69,7 +69,7 @@
 
         <Package Id='*'
             Keywords='Installer'
-            Description='Easily set package version across multiple package manager systems in mono repositories'
+            Description='Easily manage package version across multiple package manager systems in mono repositories'
             Manufacturer='Mads Hougesen'
             InstallerVersion='450'
             Languages='1033'
