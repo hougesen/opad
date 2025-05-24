@@ -12,6 +12,7 @@ pub enum PyprojectTomlError {
 impl core::error::Error for PyprojectTomlError {}
 
 impl core::fmt::Display for PyprojectTomlError {
+    #[inline]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::MissingProjectField => write!(f, "\"project\" field not found"),

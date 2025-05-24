@@ -1,5 +1,6 @@
 pub use cargo::CargoTomlError;
 pub use crystal::ShardYmlError;
+pub use npm::PackageJsonError;
 pub use pubspec::PubspecYamlError;
 pub use pyproject::PyprojectTomlError;
 

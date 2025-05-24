@@ -1,5 +1,5 @@
 use crate::package_managers::{
-    CargoTomlError, PubspecYamlError, PyprojectTomlError, ShardYmlError,
+    CargoTomlError, PackageJsonError, PubspecYamlError, PyprojectTomlError, ShardYmlError,
 };
 
 #[derive(Debug)]
@@ -9,6 +9,7 @@ pub enum Error {
     Io(std::io::Error),
     MarkedYaml(Box<marked_yaml::LoadError>),
     PubspecYaml(PubspecYamlError),
+    PackageJson(PackageJsonError),
     PyprojectToml(PyprojectTomlError),
     SerdeJson(Box<serde_json::Error>),
     ShardYml(ShardYmlError),
@@ -30,6 +31,7 @@ impl core::fmt::Display for Error {
             Self::SerdeJson(error) => error.fmt(f),
             Self::ShardYml(error) => error.fmt(f),
             Self::TomlEdit(error) => error.fmt(f),
+            Self::PackageJson(error) => error.fmt(f),
         }
     }
 }
@@ -94,5 +96,12 @@ impl From<PyprojectTomlError> for Error {
     #[inline]
     fn from(value: PyprojectTomlError) -> Self {
         Self::PyprojectToml(value)
+    }
+}
+
+impl From<PackageJsonError> for Error {
+    #[inline]
+    fn from(value: PackageJsonError) -> Self {
+        Self::PackageJson(value)
     }
 }
