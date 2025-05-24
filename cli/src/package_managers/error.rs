@@ -1,11 +1,12 @@
 use super::{
-    cargo::CargoTomlError, crystal::ShardYmlError, gleam::GleamTomlError, npm::PackageJsonError,
-    pubspec::PubspecYamlError, pyproject::PyprojectTomlError,
+    cargo::CargoTomlError, crystal::ShardYmlError, gleam::GleamTomlError, lerna::LernaJsonError,
+    npm::PackageJsonError, pubspec::PubspecYamlError, pyproject::PyprojectTomlError,
 };
 
 #[derive(Debug)]
 pub enum PackageManagerError {
     CargoToml(CargoTomlError),
+    LernaJson(LernaJsonError),
     GleamToml(GleamTomlError),
     PackageJson(PackageJsonError),
     PubspecYaml(PubspecYamlError),
@@ -20,6 +21,7 @@ impl core::fmt::Display for PackageManagerError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::CargoToml(error) => error.fmt(f),
+            Self::LernaJson(error) => error.fmt(f),
             Self::GleamToml(error) => error.fmt(f),
             Self::PackageJson(error) => error.fmt(f),
             Self::PubspecYaml(error) => error.fmt(f),
@@ -68,5 +70,12 @@ impl From<GleamTomlError> for PackageManagerError {
     #[inline]
     fn from(value: GleamTomlError) -> Self {
         Self::GleamToml(value)
+    }
+}
+
+impl From<LernaJsonError> for PackageManagerError {
+    #[inline]
+    fn from(value: LernaJsonError) -> Self {
+        Self::LernaJson(value)
     }
 }

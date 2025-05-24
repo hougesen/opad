@@ -135,7 +135,7 @@ Choose whether to update the associated lock files:
 | `JavaScript`, `TypeScript` | `npm`           | `package.json`   | `npm install` (`package-lock.json`)                       |
 | `JavaScript`, `TypeScript` | `pnpm`          | `package.json`   | `pnpm install` (`pnpm-lock.yam`)                          |
 | `JavaScript`, `TypeScript` | `bun`           | `package.json`   | `bun install` (`bun.lock`, `bun.lockb`)                   |
-| `JavaScript`, `TypeScript` | `yarn`          | `package.json`   | n/a (`yarn.lock` does not include version)                |
+| `JavaScript`, `TypeScript` | `yarn`          | `package.json`   | `yarn install` (`yarn.lock`)                              |
 | `JavaScript`, `TypeScript` | `deno`          | `deno.json`      | `deno install` (`deno.lock`,)                             |
 | `Python`                   | `uv`            | `pyproject.toml` | `uv lock` (`uv.lock`)                                     |
 | `Python`                   | `rye`           | `pyproject.toml` | `rye lock` (`requirements.lock`, `requirements-dev.lock`) |

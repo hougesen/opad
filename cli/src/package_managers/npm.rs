@@ -62,7 +62,7 @@ pub fn set_package_json_version(
 }
 
 #[inline]
-fn bun_enabled(dir: &std::path::Path) -> bool {
+pub fn bun_enabled(dir: &std::path::Path) -> bool {
     dir.join("bun.lock").exists() || dir.join("bun.lockb").exists()
 }
 
@@ -77,37 +77,46 @@ fn pnpm_enabled(dir: &std::path::Path) -> bool {
 }
 
 #[inline]
-fn npm_update_lock_file_command() -> std::process::Command {
+pub fn npm_update_lock_file_command() -> std::process::Command {
     let mut cmd = std::process::Command::new("npm");
     cmd.arg("install");
     cmd
 }
 
 #[inline]
-fn bun_update_lock_file_command() -> std::process::Command {
+pub fn bun_update_lock_file_command() -> std::process::Command {
     let mut cmd = std::process::Command::new("bun");
     cmd.arg("install");
     cmd
 }
 
 #[inline]
-fn pnpm_update_lock_file_command() -> std::process::Command {
+pub fn pnpm_update_lock_file_command() -> std::process::Command {
     let mut cmd = std::process::Command::new("pnpm");
     cmd.arg("install");
     cmd
 }
 
 #[inline]
+pub fn yarn_update_lock_file_command() -> std::process::Command {
+    let mut cmd = std::process::Command::new("yarn");
+    cmd.arg("install");
+    cmd
+}
+
+#[inline]
 pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
-    if pnpm_enabled(dir) {
-        run_update_lock_file_command(pnpm_update_lock_file_command(), dir)
+    let command = if pnpm_enabled(dir) {
+        pnpm_update_lock_file_command()
     } else if bun_enabled(dir) {
-        run_update_lock_file_command(bun_update_lock_file_command(), dir)
+        bun_update_lock_file_command()
     } else if yarn_enabled(dir) {
-        return Ok(true);
+        yarn_update_lock_file_command()
     } else {
-        run_update_lock_file_command(npm_update_lock_file_command(), dir)
-    }
+        npm_update_lock_file_command()
+    };
+
+    run_update_lock_file_command(command, dir)
 }
 
 #[cfg(test)]

@@ -1,11 +1,10 @@
-use error::PackageManagerError;
-
 mod cargo;
 mod crystal;
 mod deno;
 mod elm;
 pub mod error;
 mod gleam;
+mod lerna;
 mod npm;
 mod pubspec;
 mod pyproject;
@@ -27,6 +26,7 @@ pub enum PackageManager {
     CargoToml,
     DenoJson,
     ElmJson,
+    LernaJson,
     GleamToml,
     PackageJson,
     PubspecYaml,
@@ -41,10 +41,11 @@ impl PackageManager {
             .and_then(|inner| inner.to_str())
             .and_then(|file_name| match file_name {
                 "Cargo.toml" => Some(Self::CargoToml),
-                "deno.json" | "deno.json5" | "deno.jsonc" => Some(Self::DenoJson),
-                "elm.json" | "elm.json5" | "elm.jsonc" => Some(Self::ElmJson),
+                "deno.json" => Some(Self::DenoJson),
+                "elm.json" => Some(Self::ElmJson),
+                "lerna.json" => Some(Self::LernaJson),
                 "gleam.toml" => Some(Self::GleamToml),
-                "package.json" | "package.json5" | "package.jsonc" => Some(Self::PackageJson),
+                "package.json" => Some(Self::PackageJson),
                 "pubspec.yaml" | "pubspec.yml" => Some(Self::PubspecYaml),
                 "pyproject.toml" => Some(Self::PyProjectToml),
                 "shard.yaml" | "shard.yml" => Some(Self::ShardYml),
@@ -104,28 +105,17 @@ impl PackageManagerFile {
     pub fn set_package_version(&self, version: &str) -> Result<(), crate::error::Error> {
         let contents = std::fs::read_to_string(&self.path)?;
 
-        let (modified, output) =
-            match self.package_manager {
-                PackageManager::CargoToml => cargo::set_cargo_toml_version(contents, version)
-                    .map_err(PackageManagerError::from),
-                PackageManager::DenoJson => deno::set_deno_json_version(contents, version)
-                    .map_err(PackageManagerError::from),
-                PackageManager::ElmJson => {
-                    elm::set_elm_json_version(contents, version).map_err(PackageManagerError::from)
-                }
-                PackageManager::GleamToml => gleam::set_gleam_toml_version(contents, version)
-                    .map_err(PackageManagerError::from),
-                PackageManager::PackageJson => npm::set_package_json_version(contents, version)
-                    .map_err(PackageManagerError::from),
-                PackageManager::PubspecYaml => pubspec::set_pubspec_version(contents, version)
-                    .map_err(PackageManagerError::from),
-                PackageManager::PyProjectToml => {
-                    pyproject::set_pyproject_version(contents, version)
-                        .map_err(PackageManagerError::from)
-                }
-                PackageManager::ShardYml => crystal::set_shard_yml_version(contents, version)
-                    .map_err(PackageManagerError::from),
-            }?;
+        let (modified, output) = match self.package_manager {
+            PackageManager::CargoToml => cargo::set_cargo_toml_version(contents, version)?,
+            PackageManager::DenoJson => deno::set_deno_json_version(contents, version)?,
+            PackageManager::ElmJson => elm::set_elm_json_version(contents, version)?,
+            PackageManager::LernaJson => lerna::set_lerna_json_version(contents, version)?,
+            PackageManager::GleamToml => gleam::set_gleam_toml_version(contents, version)?,
+            PackageManager::PackageJson => npm::set_package_json_version(contents, version)?,
+            PackageManager::PubspecYaml => pubspec::set_pubspec_version(contents, version)?,
+            PackageManager::PyProjectToml => pyproject::set_pyproject_version(contents, version)?,
+            PackageManager::ShardYml => crystal::set_shard_yml_version(contents, version)?,
+        };
 
         if modified {
             std::fs::write(&self.path, output)?;
@@ -135,7 +125,7 @@ impl PackageManagerFile {
     }
 
     #[inline]
-    pub fn update_lock_files(&self) -> std::io::Result<bool> {
+    pub fn update_lock_files(&self) -> Result<bool, crate::error::Error> {
         let canon = self.path.canonicalize()?;
 
         let dir = canon.parent().unwrap_or(&self.path);
@@ -144,6 +134,7 @@ impl PackageManagerFile {
             PackageManager::CargoToml => cargo::update_lock_files(dir)?,
             PackageManager::DenoJson => deno::update_lock_files(dir)?,
             PackageManager::ElmJson => elm::update_lock_files(dir),
+            PackageManager::LernaJson => lerna::update_lock_files(dir)?,
             PackageManager::GleamToml => gleam::update_lock_files(dir),
             PackageManager::PackageJson => npm::update_lock_files(dir)?,
             PackageManager::PubspecYaml => pubspec::update_lock_files(dir),
