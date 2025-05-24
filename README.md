@@ -2,6 +2,61 @@
 
 Easily manage package version across multiple package manager systems in mono repositories.
 
+## Installation
+
+### Using Cargo
+
+opad can be installed using Cargo, the package manager for Rust ([crates.io](https://crates.io/crates/opad)).
+
+```shell
+cargo install opad
+```
+
+### Using Homebrew
+
+If you're on macOS or Linux, you can install opad using Homebrew:
+
+```shell
+# Tap and install
+brew tap hougesen/tap
+brew install opad
+
+# Or install directly in one command
+brew install hougesen/tap/opad
+```
+
+### Using npm/npx
+
+You can install `opad` using [npm](https://www.npmjs.com/package/opad):
+
+```shell
+npm install -g opad
+
+opad format .
+```
+
+Or run it directly using npx:
+
+```shell
+npx opad format .
+```
+
+### Precompiled Binaries
+
+If you do not have/want Rust or Homebrew installed on your device, you can find precompiled binaries on the [release](https://github.com/hougesen/opad/releases) page or run one of the installers below.
+
+#### Linux & MacOS
+
+```shell
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/hougesen/opad/releases/latest/download/opad-installer.sh | sh
+```
+
+#### Windows
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://github.com/hougesen/opad/releases/latest/download/opad-installer.ps1 | iex"
+```
+
 ## Usage
 
 <!-- START_SECTION:base-command-help -->
