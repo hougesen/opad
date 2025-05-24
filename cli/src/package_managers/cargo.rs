@@ -1,7 +1,7 @@
 use super::run_update_lock_file_command;
 use crate::parsers::toml;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum CargoTomlError {
     InvalidPackageFieldDataType { workspace: bool },
     InvalidVersionFieldDataType { workspace: bool },
@@ -144,8 +144,10 @@ pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
 
 #[cfg(test)]
 mod test_set_cargo_toml_version {
+    use crate::package_managers::error::PackageManagerError;
+
     #[test]
-    fn it_should_modify_version() -> Result<(), super::CargoTomlError> {
+    fn it_should_modify_version() {
         let version = "1.2.3";
 
         let input = r#"[package]
@@ -173,7 +175,8 @@ toml_edit = "0.22.26"
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_cargo_toml_version(input.to_string(), version)?;
+        let (modified, output) =
+            super::set_cargo_toml_version(input.to_string(), version).expect("it not to raise");
 
         assert!(modified);
 
@@ -181,18 +184,17 @@ toml_edit = "0.22.26"
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = super::set_cargo_toml_version(output, version)?;
+            let (modified, output) =
+                super::set_cargo_toml_version(output, version).expect("it not to raise");
 
             assert!(!modified);
 
             assert_eq!(output, expected_output);
         }
-
-        Ok(())
     }
 
     #[test]
-    fn it_should_modify_version_workspace() -> Result<(), super::CargoTomlError> {
+    fn it_should_modify_version_workspace() {
         let version = "1.2.3";
 
         let input = r#"[workspace]
@@ -227,7 +229,8 @@ toml_edit = "0.22.26"
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_cargo_toml_version(input.to_string(), version)?;
+        let (modified, output) =
+            super::set_cargo_toml_version(input.to_string(), version).expect("it not to raise");
 
         assert!(modified);
 
@@ -235,14 +238,13 @@ toml_edit = "0.22.26"
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = super::set_cargo_toml_version(output, version)?;
+            let (modified, output) =
+                super::set_cargo_toml_version(output, version).expect("it not to raise");
 
             assert!(!modified);
 
             assert_eq!(output, expected_output);
         }
-
-        Ok(())
     }
 
     #[test]
@@ -252,10 +254,14 @@ toml_edit = "0.22.26"
         let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
             .expect_err("it should return an error");
 
-        assert_eq!(
+        assert!(matches!(
             result,
             super::CargoTomlError::MissingPackageField { workspace: false }
-        );
+        ));
+
+        assert!(result.to_string().contains("\"package\""));
+
+        PackageManagerError::from(result).test_up_casting();
     }
 
     #[test]
@@ -265,10 +271,14 @@ toml_edit = "0.22.26"
         let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
             .expect_err("it should return an error");
 
-        assert_eq!(
+        assert!(matches!(
             result,
             super::CargoTomlError::MissingVersionField { workspace: false }
-        );
+        ));
+
+        assert!(result.to_string().contains("\"package.version\""));
+
+        PackageManagerError::from(result).test_up_casting();
     }
 
     #[test]
@@ -278,10 +288,14 @@ toml_edit = "0.22.26"
         let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
             .expect_err("it should return an error");
 
-        assert_eq!(
+        assert!(matches!(
             result,
             super::CargoTomlError::MissingPackageField { workspace: true }
-        );
+        ));
+
+        assert!(result.to_string().contains("\"workspace.package\""));
+
+        PackageManagerError::from(result).test_up_casting();
     }
 
     #[test]
@@ -291,9 +305,47 @@ toml_edit = "0.22.26"
         let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
             .expect_err("it should return an error");
 
-        assert_eq!(
+        assert!(matches!(
             result,
             super::CargoTomlError::MissingVersionField { workspace: true }
-        );
+        ));
+
+        assert!(result.to_string().contains("\"workspace.package.version\""));
+
+        PackageManagerError::from(result).test_up_casting();
+    }
+
+    #[test]
+    fn package_should_be_map() {
+        let input = "package = \"123\"\n";
+
+        let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            super::CargoTomlError::InvalidPackageFieldDataType { workspace: false }
+        ));
+
+        assert!(result.to_string().contains("\"package\""));
+
+        PackageManagerError::from(result).test_up_casting();
+    }
+
+    #[test]
+    fn workspace_package_should_be_map() {
+        let input = "[workspace]\npackage = \"123\"\n";
+
+        let result = super::set_cargo_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            super::CargoTomlError::InvalidPackageFieldDataType { workspace: true }
+        ));
+
+        assert!(result.to_string().contains("\"workspace.package\""));
+
+        PackageManagerError::from(result).test_up_casting();
     }
 }

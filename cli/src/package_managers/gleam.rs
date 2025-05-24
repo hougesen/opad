@@ -63,8 +63,10 @@ pub const fn update_lock_files(_dir: &std::path::Path) -> bool {
 
 #[cfg(test)]
 mod test_set_gleam_toml_version {
+    use crate::package_managers::error::PackageManagerError;
+
     #[test]
-    fn it_should_modify_version() -> Result<(), super::GleamTomlError> {
+    fn it_should_modify_version() {
         let version = "1.2.3";
 
         let input = r#"name = "sgleam_demo"
@@ -94,7 +96,8 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
 
         assert!(expected_output.contains(&new_version_line));
 
-        let (modified, output) = super::set_gleam_toml_version(input.to_string(), version)?;
+        let (modified, output) =
+            super::set_gleam_toml_version(input.to_string(), version).expect("it not to raise");
 
         assert!(modified);
 
@@ -102,13 +105,43 @@ gleeunit = ">= 1.0.0 and < 2.0.0"
 
         // Validate we do not modify file if version is the same
         {
-            let (modified, output) = super::set_gleam_toml_version(output, version)?;
+            let (modified, output) =
+                super::set_gleam_toml_version(output, version).expect("it not to raise");
 
             assert!(!modified);
 
             assert_eq!(output, expected_output);
         }
+    }
 
-        Ok(())
+    #[test]
+    fn it_should_require_version_field() {
+        let input = "";
+
+        let result = super::set_gleam_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(result, super::GleamTomlError::MissingVersionField));
+
+        assert!(result.to_string().contains("\"version\""));
+
+        PackageManagerError::from(result).test_up_casting();
+    }
+
+    #[test]
+    fn version_field_should_be_string() {
+        let input = "[version]\nkey = \"value\"\n";
+
+        let result = super::set_gleam_toml_version(input.to_string(), "1.23.4")
+            .expect_err("it should return an error");
+
+        assert!(matches!(
+            result,
+            super::GleamTomlError::InvalidVersionFieldDataType
+        ));
+
+        assert!(result.to_string().contains("\"version\""));
+
+        PackageManagerError::from(result).test_up_casting();
     }
 }

@@ -150,4 +150,19 @@ mod test_set_package_json_version {
 
         Ok(())
     }
+
+    #[test]
+    fn it_should_require_version_field() {
+        let input = "{ \"name\": \"Mads\" }";
+
+        let result = super::set_package_json_version(input.to_string(), "5.1.23")
+            .expect_err("it to return an error");
+
+        assert!(matches!(
+            result,
+            super::PackageJsonError::MissingVersionField
+        ));
+
+        assert!(result.to_string().contains("\"version\""));
+    }
 }
