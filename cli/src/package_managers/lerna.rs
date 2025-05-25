@@ -1,7 +1,7 @@
 use super::{
-    deno,
+    bun, deno,
     npm::{self, PackageJsonError, set_package_json_version},
-    run_update_lock_file_command,
+    pnpm, run_update_lock_file_command, yarn,
 };
 use crate::parsers::json;
 
@@ -44,11 +44,11 @@ pub fn update_lock_files(dir: &std::path::Path) -> Result<bool, crate::error::Er
         .unwrap_or("npm");
 
     let command = match npm_client {
-        "pnpm" => Some(npm::pnpm_update_lock_file_command()),
+        "pnpm" => Some(pnpm::pnpm_update_lock_file_command()),
         "npm" => Some(npm::npm_update_lock_file_command()),
-        "bun" => Some(npm::bun_update_lock_file_command()),
+        "bun" => Some(bun::bun_update_lock_file_command()),
         "deno" => Some(deno::deno_update_lock_file_command()),
-        "yarn" => Some(npm::yarn_update_lock_file_command()),
+        "yarn" => Some(yarn::yarn_update_lock_file_command()),
         _ => None,
     };
 
