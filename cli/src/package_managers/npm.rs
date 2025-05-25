@@ -1,4 +1,4 @@
-use super::run_update_lock_file_command;
+use super::{bun, pnpm, run_update_lock_file_command, yarn};
 use crate::parsers::json;
 
 #[derive(Debug)]
@@ -62,21 +62,6 @@ pub fn set_package_json_version(
 }
 
 #[inline]
-pub fn bun_enabled(dir: &std::path::Path) -> bool {
-    dir.join("bun.lock").exists() || dir.join("bun.lockb").exists()
-}
-
-#[inline]
-fn yarn_enabled(dir: &std::path::Path) -> bool {
-    dir.join("yarn.lock").exists()
-}
-
-#[inline]
-fn pnpm_enabled(dir: &std::path::Path) -> bool {
-    dir.join("pnpm-lock.yaml").exists() || dir.join("pnpm-lock.yml").exists()
-}
-
-#[inline]
 pub fn npm_update_lock_file_command() -> std::process::Command {
     let mut cmd = std::process::Command::new("npm");
     cmd.arg("install");
@@ -84,34 +69,13 @@ pub fn npm_update_lock_file_command() -> std::process::Command {
 }
 
 #[inline]
-pub fn bun_update_lock_file_command() -> std::process::Command {
-    let mut cmd = std::process::Command::new("bun");
-    cmd.arg("install");
-    cmd
-}
-
-#[inline]
-pub fn pnpm_update_lock_file_command() -> std::process::Command {
-    let mut cmd = std::process::Command::new("pnpm");
-    cmd.arg("install");
-    cmd
-}
-
-#[inline]
-pub fn yarn_update_lock_file_command() -> std::process::Command {
-    let mut cmd = std::process::Command::new("yarn");
-    cmd.arg("install");
-    cmd
-}
-
-#[inline]
 pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
-    let command = if pnpm_enabled(dir) {
-        pnpm_update_lock_file_command()
-    } else if bun_enabled(dir) {
-        bun_update_lock_file_command()
-    } else if yarn_enabled(dir) {
-        yarn_update_lock_file_command()
+    let command = if pnpm::pnpm_enabled(dir) {
+        pnpm::pnpm_update_lock_file_command()
+    } else if bun::bun_enabled(dir) {
+        bun::bun_update_lock_file_command()
+    } else if yarn::yarn_enabled(dir) {
+        yarn::yarn_update_lock_file_command()
     } else {
         npm_update_lock_file_command()
     };

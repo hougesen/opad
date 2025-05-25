@@ -1,3 +1,4 @@
+mod bun;
 mod cargo;
 mod crystal;
 mod deno;
@@ -6,8 +7,13 @@ pub mod error;
 mod gleam;
 mod lerna;
 mod npm;
+mod pnpm;
+mod poetry;
 mod pubspec;
 mod pyproject;
+mod rye;
+mod uv;
+mod yarn;
 
 #[inline]
 fn run_update_lock_file_command(

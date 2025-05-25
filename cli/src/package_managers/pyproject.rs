@@ -1,4 +1,4 @@
-use super::run_update_lock_file_command;
+use super::{poetry, run_update_lock_file_command, rye, uv};
 use crate::parsers::toml;
 
 #[derive(Debug)]
@@ -70,41 +70,12 @@ pub fn set_pyproject_version(
 }
 
 #[inline]
-fn uv_enabled(dir: &std::path::Path) -> bool {
-    dir.join("uv.lock").exists()
-}
-
-#[inline]
-fn uv_update_lock_file_command() -> std::process::Command {
-    let mut cmd = std::process::Command::new("uv");
-    cmd.arg("lock");
-    cmd
-}
-
-#[inline]
-fn rye_update_lock_file_command() -> std::process::Command {
-    let mut cmd = std::process::Command::new("rye");
-    cmd.arg("lock");
-    cmd
-}
-
-#[inline]
-fn rye_enabled(dir: &std::path::Path) -> bool {
-    dir.join("requirements.lock").exists() || dir.join("requirements-dev.lock").exists()
-}
-
-#[inline]
-fn poetry_enabled(dir: &std::path::Path) -> bool {
-    dir.join("poetry.lock").exists()
-}
-
-#[inline]
 pub fn update_lock_files(dir: &std::path::Path) -> std::io::Result<bool> {
-    if uv_enabled(dir) {
-        run_update_lock_file_command(uv_update_lock_file_command(), dir)
-    } else if rye_enabled(dir) {
-        run_update_lock_file_command(rye_update_lock_file_command(), dir)
-    } else if poetry_enabled(dir) {
+    if uv::uv_enabled(dir) {
+        run_update_lock_file_command(uv::uv_update_lock_file_command(), dir)
+    } else if rye::rye_enabled(dir) {
+        run_update_lock_file_command(rye::rye_update_lock_file_command(), dir)
+    } else if poetry::poetry_enabled(dir) {
         // TODO: do something?
         // NOTE: does poetry.lock even include version of package?
         Ok(true)

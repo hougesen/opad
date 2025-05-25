@@ -199,4 +199,6 @@ opad --completions nushell
 
 ## Disclaimer
 
-Not all file parsers used by this tool respect prior formatting, so you might want to run your preferred formatting tool on the files after usage.
+I wrote `opad` since I got tired of manually updating package version in my mono repositories that included multiple different languages and build tools. It might be useful for you, or it might not be. Feel free to let me know if something isn't working as you would expect, or if a feature is missing.
+
+Please be aware that not all file parsers used by this tool respect prior formatting, so you might want to run your preferred formatting tool on the files after usage.
