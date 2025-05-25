@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.0.0...HEAD)
 
+- refactor: split npm clients into multiple files [`#48`](https://github.com/hougesen/opad/pull/48)
 - feat: add support for lerna.json [`#44`](https://github.com/hougesen/opad/pull/44)
 - docs: shell completions [`#43`](https://github.com/hougesen/opad/pull/43)
 - docs: installation instructions [`#42`](https://github.com/hougesen/opad/pull/42)
