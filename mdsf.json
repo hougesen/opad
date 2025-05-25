@@ -4,6 +4,7 @@
     "bash": "shfmt",
     "fish": "fish_indent",
     "nushell": "nufmt",
+    "rust": "rustfmt",
     "shell": "shfmt",
     "zsh": "shfmt"
   }

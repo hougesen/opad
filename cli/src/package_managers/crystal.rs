@@ -6,6 +6,7 @@ pub enum ShardYmlError {
     InvalidVersionFieldDataType,
     MissingVersionField,
     ParseYml(Box<marked_yaml::LoadError>),
+    ReplaceYamlValue(yaml::NodeReplaceError),
 }
 
 impl core::error::Error for ShardYmlError {}
@@ -18,6 +19,7 @@ impl core::fmt::Display for ShardYmlError {
             Self::InvalidVersionFieldDataType => write!(f, "\"version\" field is not a string"),
             Self::MissingVersionField => write!(f, "\"version\" field not found"),
             Self::ParseYml(error) => error.fmt(f),
+            Self::ReplaceYamlValue(error) => error.fmt(f),
         }
     }
 }
@@ -41,7 +43,8 @@ pub fn set_shard_yml_version(
         .as_scalar()
         .ok_or(ShardYmlError::InvalidVersionFieldDataType)?;
 
-    let output = yaml::replace_node(&input, scalar, version);
+    let output = yaml::replace_node_value_in_input(&input, scalar, version)
+        .map_err(ShardYmlError::ReplaceYamlValue)?;
 
     let modified = output != input;
 

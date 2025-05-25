@@ -16,36 +16,71 @@ pub fn serialize(input: &str) -> String {
     format!("{}\n", input.trim())
 }
 
-#[inline]
-pub fn replace_node(input: &str, node: &MarkedScalarNode, replace_with: &str) -> String {
-    let mut output = String::new();
+#[derive(Debug)]
+pub enum NodeReplaceError {
+    SpanStartMissing,
+    StartLineNotFound,
+}
 
-    if let Some(start) = node.span().start() {
-        for (index, line) in input.lines().enumerate() {
-            if index + 1 == start.line() {
-                let mut temp = line.to_string();
+impl core::error::Error for NodeReplaceError {}
 
-                let start_index = start.column() - 1;
-
-                let end_index = start_index + node.len();
-
-                temp.replace_range(start_index..end_index, replace_with);
-
-                output.push_str(&temp);
-            } else {
-                output.push_str(line);
-            }
-
-            output.push('\n');
+impl core::fmt::Display for NodeReplaceError {
+    #[inline]
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::SpanStartMissing => write!(f, "Internal: value node span is missing"),
+            Self::StartLineNotFound => write!(f, "Internal: value node span start line not found"),
         }
     }
+}
 
-    output
+#[inline]
+pub fn replace_node_value_in_input(
+    input: &str,
+    node: &MarkedScalarNode,
+    replace_with: &str,
+) -> Result<String, NodeReplaceError> {
+    let mut output = String::new();
+
+    let start = node
+        .span()
+        .start()
+        .ok_or(NodeReplaceError::SpanStartMissing)?;
+
+    let start_line = start.line() - 1;
+
+    let mut value_replaced = false;
+
+    for (index, line) in input.lines().enumerate() {
+        if index == start_line {
+            let start_index = start.column() - 1;
+
+            let end_index = start_index + node.len();
+
+            let mut line_string = line.to_string();
+
+            line_string.replace_range(start_index..end_index, replace_with);
+
+            output.push_str(&line_string);
+
+            value_replaced = true;
+        } else {
+            output.push_str(line);
+        }
+
+        output.push('\n');
+    }
+
+    if value_replaced {
+        Ok(output)
+    } else {
+        Err(NodeReplaceError::StartLineNotFound)
+    }
 }
 
 #[cfg(test)]
 mod test_parse {
-    use crate::parsers::yaml::replace_node;
+    use crate::parsers::yaml::replace_node_value_in_input;
 
     const INPUT: &str = r#"# this is a comment
 
@@ -57,15 +92,16 @@ name: Mads Hougesen
     fn it_should_support_comments() -> Result<(), marked_yaml::LoadError> {
         let mut document = super::parse(INPUT)?;
 
-        let mut output = String::new();
+        let map = document.as_mapping_mut().expect("document to be a map");
 
-        if let Some(map) = document.as_mapping_mut() {
-            if let Some(version_node) = map.get_node("version") {
-                if let Some(scalar) = version_node.as_scalar() {
-                    output = replace_node(INPUT, scalar, "1.2.3");
-                }
-            }
-        }
+        let version_node = map
+            .get_node("version")
+            .expect("document to have a version field");
+
+        let scalar = version_node.as_scalar().expect("node to be a scalar");
+
+        let output =
+            replace_node_value_in_input(INPUT, scalar, "1.2.3").expect("input to be replace");
 
         let expected_output = r#"# this is a comment
 
