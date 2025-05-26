@@ -137,11 +137,12 @@ Choose whether to update the associated lock files:
 | `JavaScript`, `TypeScript` | `bun`           | `package.json`   | `bun install` (`bun.lock`, `bun.lockb`)                   |
 | `JavaScript`, `TypeScript` | `yarn`          | `package.json`   | `yarn install` (`yarn.lock`)                              |
 | `JavaScript`, `TypeScript` | `deno`          | `deno.json`      | `deno install` (`deno.lock`,)                             |
+| `JavaScript`, `TypeScript` | `lerna`         | `lerna.json`     | Depends on the `npmClient` field                          |
 | `Python`                   | `uv`            | `pyproject.toml` | `uv lock` (`uv.lock`)                                     |
 | `Python`                   | `rye`           | `pyproject.toml` | `rye lock` (`requirements.lock`, `requirements-dev.lock`) |
 | `Python`                   | `poetry`        | `pyproject.toml` | n/a (`poetry.lock` does not include version)              |
 | `Gleam`                    | `gleam`         | `gleam.toml`     | n/a (`manifest.toml` does not include version)            |
-| `Dart`                     | `pub`           | `gleam.toml`     | n/a (`pubspec.lock` does not include version)             |
+| `Dart`                     | `pub`           | `pubspec.yaml`   | n/a (`pubspec.lock` does not include version)             |
 | `Crystal`                  | `shards`        | `shard.yml`      | n/a (`shard.lock` does not include version)               |
 | `Elm`                      | `elm`           | `elm.json`       | n/a (elm does not have a lock file (?))                   |
 

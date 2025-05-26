@@ -19,7 +19,6 @@ pub fn serialize(input: &str) -> String {
 #[derive(Debug)]
 pub enum NodeReplaceError {
     SpanStartMissing,
-    StartLineNotFound,
 }
 
 impl core::error::Error for NodeReplaceError {}
@@ -29,7 +28,6 @@ impl core::fmt::Display for NodeReplaceError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::SpanStartMissing => write!(f, "Internal: value node span is missing"),
-            Self::StartLineNotFound => write!(f, "Internal: value node span start line not found"),
         }
     }
 }
@@ -40,42 +38,24 @@ pub fn replace_node_value_in_input(
     node: &MarkedScalarNode,
     replace_with: &str,
 ) -> Result<String, NodeReplaceError> {
-    let mut output = String::new();
-
     let start = node
         .span()
         .start()
         .ok_or(NodeReplaceError::SpanStartMissing)?;
 
-    let start_line = start.line() - 1;
+    let chars_before = input.chars().take(start.character());
 
-    let mut value_replaced = false;
+    let chars_after = input
+        .chars()
+        .skip(start.character())
+        .skip(node.chars().count());
 
-    for (index, line) in input.lines().enumerate() {
-        if index == start_line {
-            let start_index = start.column() - 1;
+    let output = chars_before
+        .chain(replace_with.chars())
+        .chain(chars_after)
+        .collect();
 
-            let end_index = start_index + node.len();
-
-            let mut line_string = line.to_string();
-
-            line_string.replace_range(start_index..end_index, replace_with);
-
-            output.push_str(&line_string);
-
-            value_replaced = true;
-        } else {
-            output.push_str(line);
-        }
-
-        output.push('\n');
-    }
-
-    if value_replaced {
-        Ok(output)
-    } else {
-        Err(NodeReplaceError::StartLineNotFound)
-    }
+    Ok(output)
 }
 
 #[cfg(test)]
@@ -89,8 +69,8 @@ name: Mads Hougesen
 "#;
 
     #[test]
-    fn it_should_support_comments() -> Result<(), marked_yaml::LoadError> {
-        let mut document = super::parse(INPUT)?;
+    fn it_should_support_comments() {
+        let mut document = super::parse(INPUT).expect("it to parse");
 
         let map = document.as_mapping_mut().expect("document to be a map");
 
@@ -110,7 +90,28 @@ name: Mads Hougesen
 "#;
 
         assert_eq!(output, expected_output);
+    }
 
-        Ok(())
+    #[test]
+    fn it_should_not_replace_line_endings_crlf() {
+        let input = INPUT.lines().collect::<Vec<_>>().join("\r\n");
+
+        let mut document = super::parse(&input).expect("it to parse");
+
+        let map = document.as_mapping_mut().expect("document to be a map");
+
+        let version_node = map
+            .get_node("version")
+            .expect("document to have a version field");
+
+        let scalar = version_node.as_scalar().expect("node to be a scalar");
+
+        let output =
+            replace_node_value_in_input(&input, scalar, "1.2.3").expect("input to be replace");
+
+        let expected_output =
+            "# this is a comment\r\n\r\nversion:    1.2.3    #mads\r\nname: Mads Hougesen";
+
+        assert_eq!(output, expected_output);
     }
 }
