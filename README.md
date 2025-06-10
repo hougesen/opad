@@ -62,7 +62,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://github.com/hougesen/opad/rele
 <!-- START_SECTION:base-command-help -->
 
 ```
-opad 0.0.1-dev
+opad 0.1.0
 Easily manage package version across multiple package manager systems in mono repositories
 Mads Hougesen <mads@mhouge.dk>
 
