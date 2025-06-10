@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.0.0...HEAD)
 
+- refactor(deps): upgrade to marked-yaml 0.8.0 [`#51`](https://github.com/hougesen/opad/pull/51)
 - refactor(yaml): indicate if unable to replace value [`#50`](https://github.com/hougesen/opad/pull/50)
 - test(cli): add test for --completions [`#49`](https://github.com/hougesen/opad/pull/49)
 - refactor: split npm clients into multiple files [`#48`](https://github.com/hougesen/opad/pull/48)
