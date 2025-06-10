@@ -10,11 +10,12 @@ authors = ["Mads Hougesen <mads@mhouge.dk>"]
 license = "MIT"
 repository = "https://github.com/hougesen/opad"
 documentation = "https://github.com/hougesen/opad#readme"
+readme = "README.md"
 
 [workspace.dependencies]
 assert_cmd = "2.0.17"
 clap = { version = "4.5.38", features = ["derive"] }
-clap_complete = "4.5.50"
+clap_complete = "4.5.53"
 clap_complete_nushell = "4.5.5"
 crossterm = "0.29.0"
 ignore = "0.4.23"
