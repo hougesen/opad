@@ -3,7 +3,7 @@ members = ["cli"]
 resolver = "3"
 
 [workspace.package]
-version = "0.0.1-dev"
+version = "0.1.0"
 edition = "2024"
 homepage = "https://github.com/hougesen/opad?tab=readme-ov-file"
 authors = ["Mads Hougesen <mads@mhouge.dk>"]

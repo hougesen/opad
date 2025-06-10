@@ -2,8 +2,17 @@
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
-#### [Unreleased](https://github.com/hougesen/opad/compare/v0.0.0...HEAD)
+#### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.0...HEAD)
 
+#### [v0.1.0](https://github.com/hougesen/opad/compare/v0.0.0...v0.1.0)
+
+> 10 June 2025
+
+- chore: release v0.1.0 [`#56`](https://github.com/hougesen/opad/pull/56)
+- build(deps): bump clap from 4.5.38 to 4.5.40 [`#55`](https://github.com/hougesen/opad/pull/55)
+- build(deps): bump toml_edit from 0.22.26 to 0.22.27 [`#53`](https://github.com/hougesen/opad/pull/53)
+- build(deps): bump clap_complete_nushell from 4.5.5 to 4.5.7 [`#54`](https://github.com/hougesen/opad/pull/54)
+- build(deps): bump clap_complete to v4.5.53 [`#52`](https://github.com/hougesen/opad/pull/52)
 - refactor(deps): upgrade to marked-yaml 0.8.0 [`#51`](https://github.com/hougesen/opad/pull/51)
 - refactor(yaml): indicate if unable to replace value [`#50`](https://github.com/hougesen/opad/pull/50)
 - test(cli): add test for --completions [`#49`](https://github.com/hougesen/opad/pull/49)
