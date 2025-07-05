@@ -12,11 +12,10 @@ jobs:
     name: lint
     strategy:
       matrix:
-        os:
-          - windows-latest
-          - macos-latest
-          - ubuntu-latest
+        os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
