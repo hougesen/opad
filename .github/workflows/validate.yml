@@ -15,7 +15,7 @@ jobs:
         os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     permissions:
-      contents: create
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
