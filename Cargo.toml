@@ -1,16 +1,16 @@
 [workspace]
-members = ["cli"]
 resolver = "3"
+members = ["cli"]
 
 [workspace.package]
-version = "0.1.0"
-edition = "2024"
-homepage = "https://github.com/hougesen/opad?tab=readme-ov-file"
+version = "0.1.0-next"
 authors = ["Mads Hougesen <mads@mhouge.dk>"]
-license = "MIT"
-repository = "https://github.com/hougesen/opad"
+edition = "2024"
 documentation = "https://github.com/hougesen/opad#readme"
 readme = "README.md"
+homepage = "https://github.com/hougesen/opad?tab=readme-ov-file"
+repository = "https://github.com/hougesen/opad"
+license = "MIT"
 
 [workspace.dependencies]
 assert_cmd = "2.0.17"

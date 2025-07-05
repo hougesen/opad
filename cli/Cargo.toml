@@ -1,15 +1,15 @@
 [package]
 name = "opad"
 version = { workspace = true }
+authors = { workspace = true }
 edition = { workspace = true }
 description = "Easily manage package version across multiple package manager systems in mono repositories"
-authors = { workspace = true }
-license = { workspace = true }
-repository = { workspace = true }
-keywords = ["monorepository", "package-management"]
-homepage = { workspace = true }
-readme = { workspace = true }
 documentation = { workspace = true }
+readme = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+keywords = ["monorepository", "package-management"]
 categories = ["command-line-utilities", "development-tools"]
 
 [package.metadata.wix]

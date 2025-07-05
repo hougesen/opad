@@ -6,13 +6,13 @@ run = ["npx auto-changelog --hide-credit -u -l 100 -b 100"]
 
 [tasks.format]
 run = [
+  "tombi format",
   "taplo format",
   "mise fmt",
   "cargo +nightly fmt",
   "mdsf format --cache .",
   "npx --yes prettier@latest --write --cache .",
 ]
-
 
 [tasks.dist]
 run = ["dist init --yes"]
