@@ -16,7 +16,7 @@ license = "MIT"
 assert_cmd = "2.0.17"
 clap = { version = "4.5.40", features = ["derive"] }
 clap_complete = "4.5.55"
-clap_complete_nushell = "4.5.7"
+clap_complete_nushell = "4.5.8"
 crossterm = "0.29.0"
 ignore = "0.4.23"
 inquire = "0.7.5"
