@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.0...HEAD)
 
+- build(deps): bump clap from 4.5.40 to 4.5.41 [`#59`](https://github.com/hougesen/opad/pull/59)
+- build(deps): bump clap_complete_nushell from 4.5.7 to 4.5.8 [`#60`](https://github.com/hougesen/opad/pull/60)
+- build(deps): bump clap_complete from 4.5.54 to 4.5.55 [`#61`](https://github.com/hougesen/opad/pull/61)
+- ci: set workflow permissions for release-crates.yml [`#58`](https://github.com/hougesen/opad/pull/58)
 - ci: set permissions for validate.yml [`#57`](https://github.com/hougesen/opad/pull/57)
 
 #### [v0.1.0](https://github.com/hougesen/opad/compare/v0.0.0...v0.1.0)
