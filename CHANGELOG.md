@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.0...HEAD)
 
+- build(deps): bump serde_json from 1.0.141 to 1.0.142 [`#66`](https://github.com/hougesen/opad/pull/66)
+- build(deps): bump clap from 4.5.41 to 4.5.42 [`#65`](https://github.com/hougesen/opad/pull/65)
+- build(deps): bump rand from 0.9.1 to 0.9.2 [`#64`](https://github.com/hougesen/opad/pull/64)
+- build(deps): bump serde_json from 1.0.140 to 1.0.141 [`#63`](https://github.com/hougesen/opad/pull/63)
+- build: upgrade cargo dist to v0.28.1 [`#62`](https://github.com/hougesen/opad/pull/62)
 - build(deps): bump clap from 4.5.40 to 4.5.41 [`#59`](https://github.com/hougesen/opad/pull/59)
 - build(deps): bump clap_complete_nushell from 4.5.7 to 4.5.8 [`#60`](https://github.com/hougesen/opad/pull/60)
 - build(deps): bump clap_complete from 4.5.54 to 4.5.55 [`#61`](https://github.com/hougesen/opad/pull/61)
