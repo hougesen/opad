@@ -3,7 +3,7 @@ resolver = "3"
 members = ["cli"]
 
 [workspace.package]
-version = "0.1.0-next"
+version = "0.1.1"
 authors = ["Mads Hougesen <mads@mhouge.dk>"]
 edition = "2024"
 documentation = "https://github.com/hougesen/opad#readme"
