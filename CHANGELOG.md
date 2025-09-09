@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.0...HEAD)
 
+- build(cargo-dist): bump version to v0.30.0 [`#81`](https://github.com/hougesen/opad/pull/81)
 - build(deps): bump tempfile from 3.21.0 to 3.22.0 [`#80`](https://github.com/hougesen/opad/pull/80)
 - build(deps): bump clap from 4.5.46 to 4.5.47 [`#79`](https://github.com/hougesen/opad/pull/79)
 - build(deps): bump clap from 4.5.45 to 4.5.46 [`#77`](https://github.com/hougesen/opad/pull/77)
@@ -25,6 +26,7 @@ All notable changes to this project will be documented in this file. Dates are d
 - build(deps): bump clap_complete from 4.5.54 to 4.5.55 [`#61`](https://github.com/hougesen/opad/pull/61)
 - ci: set workflow permissions for release-crates.yml [`#58`](https://github.com/hougesen/opad/pull/58)
 - ci: set permissions for validate.yml [`#57`](https://github.com/hougesen/opad/pull/57)
+- build(deps): bump actions/checkout from 4 to 5 [`3b5b976`](https://github.com/hougesen/opad/commit/3b5b97609e53d36cb6d6962c796bf571b1cf3465)
 
 #### [v0.1.0](https://github.com/hougesen/opad/compare/v0.0.0...v0.1.0)
 
