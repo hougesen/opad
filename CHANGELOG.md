@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.0...HEAD)
 
+- build(deps): bump tempfile from 3.21.0 to 3.22.0 [`#80`](https://github.com/hougesen/opad/pull/80)
+- build(deps): bump clap from 4.5.46 to 4.5.47 [`#79`](https://github.com/hougesen/opad/pull/79)
+- build(deps): bump clap from 4.5.45 to 4.5.46 [`#77`](https://github.com/hougesen/opad/pull/77)
+- build(deps): bump serde_json from 1.0.142 to 1.0.143 [`#76`](https://github.com/hougesen/opad/pull/76)
+- build(deps): bump tempfile from 3.20.0 to 3.21.0 [`#75`](https://github.com/hougesen/opad/pull/75)
+- build(deps): bump clap from 4.5.44 to 4.5.45 [`#74`](https://github.com/hougesen/opad/pull/74)
+- build(deps): bump clap_complete from 4.5.56 to 4.5.57 [`#73`](https://github.com/hougesen/opad/pull/73)
+- build(deps): bump clap from 4.5.43 to 4.5.44 [`#72`](https://github.com/hougesen/opad/pull/72)
+- build(deps): bump clap_complete from 4.5.55 to 4.5.56 [`#71`](https://github.com/hougesen/opad/pull/71)
+- build(deps): bump clap from 4.5.42 to 4.5.43 [`#69`](https://github.com/hougesen/opad/pull/69)
+- build(cargo-dist): bump version to v0.29.0 [`#67`](https://github.com/hougesen/opad/pull/67)
 - build(deps): bump serde_json from 1.0.141 to 1.0.142 [`#66`](https://github.com/hougesen/opad/pull/66)
 - build(deps): bump clap from 4.5.41 to 4.5.42 [`#65`](https://github.com/hougesen/opad/pull/65)
 - build(deps): bump rand from 0.9.1 to 0.9.2 [`#64`](https://github.com/hougesen/opad/pull/64)
