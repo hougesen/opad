@@ -4,11 +4,17 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.1...HEAD)
 
+- build(deps): bump tempfile from 3.22.0 to 3.23.0 [`#87`](https://github.com/hougesen/opad/pull/87)
+- build(deps): bump clap_complete from 4.5.57 to 4.5.58 [`#85`](https://github.com/hougesen/opad/pull/85)
+- build(deps): bump serde_json from 1.0.143 to 1.0.145 [`#84`](https://github.com/hougesen/opad/pull/84)
+- build(deps): bump clap from 4.5.47 to 4.5.48 [`#86`](https://github.com/hougesen/opad/pull/86)
+- chore: add citation file [`18afac0`](https://github.com/hougesen/opad/commit/18afac08fa511c2eed9c32515cd3f243c7c13fe7)
+
 #### [v0.1.1](https://github.com/hougesen/opad/compare/v0.1.0...v0.1.1)
 
 > 9 September 2025
 
-- chore: release v0.1.1 [`#82`](https://github.com/hougesen/opad/pull/82)
+- chore: release v0.1.1 [`#83`](https://github.com/hougesen/opad/pull/83)
 - build(deps): bump actions/checkout from 4 to 5 [`#70`](https://github.com/hougesen/opad/pull/70)
 - build(cargo-dist): bump version to v0.30.0 [`#81`](https://github.com/hougesen/opad/pull/81)
 - build(deps): bump tempfile from 3.21.0 to 3.22.0 [`#80`](https://github.com/hougesen/opad/pull/80)
