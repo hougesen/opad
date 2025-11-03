@@ -18,7 +18,7 @@ clap = { version = "4.5.50", features = ["derive"] }
 clap_complete = "4.5.59"
 clap_complete_nushell = "4.5.9"
 crossterm = "0.29.0"
-ignore = "0.4.24"
+ignore = "0.4.25"
 inquire = "0.9.1"
 marked-yaml = "0.8.0"
 predicates = "3.1.3"
