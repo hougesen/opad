@@ -5,8 +5,7 @@ fn completions_command_outputs_shell_completions() {
     let shells = ["bash", "elvish", "fish", "nushell", "powershell", "zsh"];
 
     for shell in shells {
-        assert_cmd::Command::cargo_bin("opad")
-            .expect("it not to raise")
+        assert_cmd::cargo_bin_cmd!("opad")
             .arg("--completions")
             .arg(shell)
             .assert()

@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.1...HEAD)
 
+- build(deps): bump actions/checkout from 4 to 6 [`#104`](https://github.com/hougesen/opad/pull/104)
+- build(deps): bump clap_complete_nushell from 4.5.9 to 4.5.10 [`#103`](https://github.com/hougesen/opad/pull/103)
+- build(cargo-dist): update to v0.30.2 [`#107`](https://github.com/hougesen/opad/pull/107)
 - build(deps): bump clap_complete from 4.5.59 to 4.5.61 [`#105`](https://github.com/hougesen/opad/pull/105)
 - build(deps): bump clap from 4.5.50 to 4.5.53 [`#106`](https://github.com/hougesen/opad/pull/106)
 - build(deps): bump ignore from 0.4.24 to 0.4.25 [`#101`](https://github.com/hougesen/opad/pull/101)
