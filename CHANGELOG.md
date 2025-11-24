@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. Dates are d
 
 #### [Unreleased](https://github.com/hougesen/opad/compare/v0.1.1...HEAD)
 
+- build(deps): bump clap_complete from 4.5.59 to 4.5.61 [`#105`](https://github.com/hougesen/opad/pull/105)
+- build(deps): bump clap from 4.5.50 to 4.5.53 [`#106`](https://github.com/hougesen/opad/pull/106)
+- build(deps): bump ignore from 0.4.24 to 0.4.25 [`#101`](https://github.com/hougesen/opad/pull/101)
+- build(deps): bump assert_cmd from 2.0.17 to 2.1.1 [`#99`](https://github.com/hougesen/opad/pull/99)
+- build(deps): bump clap_complete from 4.5.58 to 4.5.59 [`#91`](https://github.com/hougesen/opad/pull/91)
+- build(deps): bump clap_complete_nushell from 4.5.8 to 4.5.9 [`#90`](https://github.com/hougesen/opad/pull/90)
+- build(deps): bump inquire from 0.7.5 to 0.9.1 [`#92`](https://github.com/hougesen/opad/pull/92)
+- build(deps): bump ignore from 0.4.23 to 0.4.24 [`#93`](https://github.com/hougesen/opad/pull/93)
+- build(deps): bump clap from 4.5.48 to 4.5.50 [`#94`](https://github.com/hougesen/opad/pull/94)
+- build(deps): bump toml_edit from 0.22.27 to 0.23.5 [`#95`](https://github.com/hougesen/opad/pull/95)
+- build(dist): use default runner [`#88`](https://github.com/hougesen/opad/pull/88)
 - build(deps): bump tempfile from 3.22.0 to 3.23.0 [`#87`](https://github.com/hougesen/opad/pull/87)
 - build(deps): bump clap_complete from 4.5.57 to 4.5.58 [`#85`](https://github.com/hougesen/opad/pull/85)
 - build(deps): bump serde_json from 1.0.143 to 1.0.145 [`#84`](https://github.com/hougesen/opad/pull/84)

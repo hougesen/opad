@@ -1,3 +1,4 @@
+---
 version: 2
 updates:
   - package-ecosystem: cargo
@@ -16,5 +17,6 @@ updates:
     assignees: [hougesen]
     directory: /
     open-pull-requests-limit: 100
+    exclude-paths: [.github/workflows/release.yml]
     schedule:
       interval: weekly
